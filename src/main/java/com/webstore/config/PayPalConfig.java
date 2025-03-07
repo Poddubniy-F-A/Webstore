@@ -1,4 +1,4 @@
-package com.webstore.utils;
+package com.webstore.config;
 
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.OAuthTokenCredential;

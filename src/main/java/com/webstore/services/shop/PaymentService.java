@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
-import static com.webstore.utils.PayPalConfig.getAPIContext;
+import static com.webstore.config.PayPalConfig.getAPIContext;
 import static java.util.Collections.singletonList;
 
 @Service

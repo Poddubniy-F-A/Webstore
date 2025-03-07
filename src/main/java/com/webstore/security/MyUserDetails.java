@@ -1,4 +1,4 @@
-package com.webstore.utils.security;
+package com.webstore.security;
 
 import com.webstore.entities.User;
 import lombok.AllArgsConstructor;
