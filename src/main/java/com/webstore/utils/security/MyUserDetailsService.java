@@ -4,6 +4,7 @@ import com.webstore.entities.User;
 import com.webstore.repositories.UsersRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,6 +15,10 @@ import java.util.Collections;
 @Service
 @AllArgsConstructor
 public class MyUserDetailsService implements UserDetailsService {
+    public static User userFromContext() {
+        return ((MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+    }
+
     private final UsersRepository repository;
 
     @Override

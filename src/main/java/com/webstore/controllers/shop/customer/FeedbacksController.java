@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.webstore.utils.security.SecurityConfig.userFromContext;
+import static com.webstore.utils.security.MyUserDetailsService.userFromContext;
 
 @Controller
 @AllArgsConstructor

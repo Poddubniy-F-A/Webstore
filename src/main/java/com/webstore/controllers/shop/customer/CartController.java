@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.HashMap;
 
-import static com.webstore.utils.security.SecurityConfig.userFromContext;
+import static com.webstore.utils.security.MyUserDetailsService.userFromContext;
 
 @Controller
 @AllArgsConstructor
