@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security6">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,7 +56,7 @@
         <h2 th:case="null">В каталоге нет товаров</h2>
         <div th:case="*">
             <h2>Товары</h2>
-            <p><a href="/management/add">Добавить товар</a></p>
+            <p><a th:href="${@environment.getProperty('app.endpoints.management.creating')}">Добавить товар</a></p>
             <table>
                 <thead>
                 <tr>
@@ -78,7 +78,7 @@
                     <td th:text="${good.brand}"></td>
                     <td th:text="${good.category}"></td>
                     <td th:text="${good.price}"></td>
-                    <td><a th:href="@{management/edit/{id}(id=${good.id})}">Изменить</a></td>
+                    <td><a th:href="@{${@environment.getProperty('app.endpoints.management.editing') + '/' + good.id}}">Изменить</a></td>
                 </tr>
                 </tbody>
             </table>

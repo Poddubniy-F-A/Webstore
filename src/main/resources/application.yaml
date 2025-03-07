@@ -1,6 +1,25 @@
 server:
   port: 8080
 
+app:
+  endpoints:
+    management:
+      main: /management
+      creating: /management/create
+      editing: /management/edit
+    warehouse:
+      main: /warehouse
+    catalog:
+      main: /catalog
+      good-page: /catalog/{id}
+    customer:
+      cart:
+        main: /customer/cart
+      feedbacks:
+        main: /customer/feedbacks
+    mod_auth:
+      enter: /mod_auth/enter
+      process_login: /mod_auth/process_login
 
 spring:
   application:

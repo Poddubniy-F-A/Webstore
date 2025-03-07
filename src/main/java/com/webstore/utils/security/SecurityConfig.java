@@ -1,6 +1,7 @@
 package com.webstore.utils.security;
 
 import com.webstore.entities.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -52,18 +53,21 @@ public class SecurityConfig {
     @Configuration
     @Order(2)
     public static class ModeratorConfigurationAdapter {
+        @Value("${app.endpoints.management.main}")
+        private String managementRoot;
+
         @Bean
         SecurityFilterChain moderatorFilterChain(HttpSecurity http) throws Exception {
             http
-                    .securityMatcher("/mod_auth/**", "/management/**")
+                    .securityMatcher("/mod_auth/**", managementRoot + "/**")
                     .authorizeHttpRequests(authorize -> authorize
-                            .requestMatchers("/management/**").hasRole("MODERATOR")
+                            .requestMatchers(managementRoot + "/**").hasRole("MODERATOR")
                             .anyRequest().permitAll()) // или другие роли
                     .formLogin(login -> login
                             .loginPage("/mod_auth")
                             .permitAll()
                             .loginProcessingUrl("/mod_auth/process_login")
-                            .defaultSuccessUrl("/management")
+                            .defaultSuccessUrl(managementRoot)
                             .failureUrl("/mod_auth?error=true"))
                     .exceptionHandling(handling -> handling
                             .accessDeniedPage("/man_access_denied"))

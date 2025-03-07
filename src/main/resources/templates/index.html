@@ -28,11 +28,12 @@
     </style>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
+
 <body>
 <div class="welcome">Добро пожаловать в МойМагазин!</div>
 <a href="/catalog" class="button bottom">К каталогу</a>
 <div class="top-right">
-    <a href="/management" class="button">В модераторскую</a>
+    <a th:href="${@environment.getProperty('app.endpoints.management.main')}" class="button">В модераторскую</a>
     <br>
     <br>
     <br>
