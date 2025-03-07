@@ -73,18 +73,21 @@ public class SecurityConfig {
     @Configuration
     @Order(3)
     public static class wwConfigurationAdapter {
+        @Value("${app.endpoints.warehouse.main}")
+        private String warehouseRoot;
+
         @Bean
         SecurityFilterChain wwFilterChain(HttpSecurity http) throws Exception {
             http
-                    .securityMatcher("/ww_auth/**", "/warehouse/**")
+                    .securityMatcher("/ww_auth/**", warehouseRoot + "/**")
                     .authorizeHttpRequests(authorize -> authorize
-                            .requestMatchers("/warehouse/**").hasRole("WH_WORKER")
+                            .requestMatchers(warehouseRoot + "/**").hasRole("WH_WORKER")
                             .anyRequest().permitAll()) // или другие роли
                     .formLogin(login -> login
                             .loginPage("/ww_auth")
                             .permitAll()
                             .loginProcessingUrl("/ww_auth/process_login")
-                            .defaultSuccessUrl("/warehouse")
+                            .defaultSuccessUrl(warehouseRoot)
                             .failureUrl("/ww_auth?error=true"))
                     .exceptionHandling(handling -> handling
                             .accessDeniedPage("/wh_access_denied"))
