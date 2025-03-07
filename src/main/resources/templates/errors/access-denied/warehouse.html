@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ошибка доступа</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="body">
+    <h1>В доступе отказано</h1>
+    <h3>У вас нет права доступа к управлению складом</h3>
+    <a href="/index" class="button">Вернуться на главную</a>
+    <a th:href="@{/ww_auth}" class="button">Авторизоваться повторно</a>
+</div>
+</body>
+</html>

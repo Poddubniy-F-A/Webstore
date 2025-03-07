@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Вход для покупателей</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div th:replace="auth/login/login-template :: login(link='/cust_auth/process_login')"></div>
+</body>
+</html>
