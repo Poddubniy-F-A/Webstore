@@ -32,7 +32,7 @@
 
 <div class="top-right">
     <div class="user-info">
-        <form th:method="post" th:action="@{/logout}">
+        <form th:method="post" th:action="${@environment.getProperty('app.endpoints.auth.logout')}">
             <button type="submit" class="button">Выйти</button>
         </form>
     </div>

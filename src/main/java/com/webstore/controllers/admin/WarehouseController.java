@@ -3,7 +3,7 @@ package com.webstore.controllers.admin;
 import com.webstore.exceptions.GoodNotFoundException;
 import com.webstore.exceptions.IllegalGoodsCountException;
 import com.webstore.services.shop.GoodsService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class WarehouseController {
-    private GoodsService service;
+
+    private final GoodsService service;
 
     @GetMapping(value = "${app.endpoints.warehouse.main}")
     public String warehousePage() {

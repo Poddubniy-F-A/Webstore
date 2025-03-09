@@ -14,6 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
     @Bean
     PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -22,23 +23,49 @@ public class SecurityConfig {
     @Configuration
     @Order(1)
     public static class CustomerConfigurationAdapter {
+        @Value("${app.endpoints.catalog.main}")
+        private String catalogRootUrl;
+        @Value("${app.endpoints.cart.main}")
+        private String cartRootUrl;
+        @Value("${app.endpoints.feedbacks.main}")
+        private String feedbacksRootUrl;
+
+        @Value("${app.endpoints.auth.customer.main}")
+        private String authUrl;
+        @Value("${app.endpoints.auth.customer.login}")
+        private String loginUrl;
+
+        @Value("${app.endpoints.auth.logout}")
+        private String logoutUrl;
+        @Value("${app.endpoints.main}")
+        private String logoutSuccessUrl;
+
+        @Value("${app.endpoints.errors.access_denied.cust_service}")
+        private String accessDeniedUrl;
+
         @Bean
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             http
-                    .securityMatcher("/logout", "/cust_auth/**", "/catalog/**", "/customer/**")
+                    .securityMatcher(
+                            authUrl + "/**",
+                            catalogRootUrl + "/**",
+                            cartRootUrl + "/**",
+                            feedbacksRootUrl + "/**",
+                            logoutUrl
+                    )
                     .authorizeHttpRequests(authorize -> authorize
-                            .requestMatchers("/customer/**").hasRole("CUSTOMER")
+                            .requestMatchers(cartRootUrl + "/**", feedbacksRootUrl + "/**").hasRole("CUSTOMER")
                             .anyRequest().permitAll())
                     .formLogin(login -> login
-                            .loginPage("/cust_auth/enter")
+                            .loginPage(authUrl)
                             .permitAll()
-                            .loginProcessingUrl("/cust_auth/process_login")
-                            .defaultSuccessUrl("/catalog")
-                            .failureUrl("/cust_auth/enter?error=true"))
+                            .loginProcessingUrl(loginUrl)
+                            .defaultSuccessUrl(catalogRootUrl)
+                            .failureUrl(authUrl + "?error=true"))
                     .logout(logout -> logout
-                            .logoutSuccessUrl("/index"))
+                            .logoutSuccessUrl(logoutSuccessUrl))
                     .exceptionHandling(handling -> handling
-                            .accessDeniedPage("/cat_access_denied"))
+                            .accessDeniedPage(accessDeniedUrl))
                     .csrf(AbstractHttpConfigurer::disable);
             return http.build();
         }
@@ -48,23 +75,31 @@ public class SecurityConfig {
     @Order(2)
     public static class ModeratorConfigurationAdapter {
         @Value("${app.endpoints.management.main}")
-        private String managementRoot;
+        private String rootUrl;
+
+        @Value("${app.endpoints.auth.moderator.main}")
+        private String authUrl;
+        @Value("${app.endpoints.auth.moderator.login}")
+        private String loginUrl;
+
+        @Value("${app.endpoints.errors.access_denied.management}")
+        private String accessDeniedUrl;
 
         @Bean
         SecurityFilterChain moderatorFilterChain(HttpSecurity http) throws Exception {
             http
-                    .securityMatcher("/mod_auth/**", managementRoot + "/**")
+                    .securityMatcher(authUrl + "/**", rootUrl + "/**")
                     .authorizeHttpRequests(authorize -> authorize
-                            .requestMatchers(managementRoot + "/**").hasRole("MODERATOR")
-                            .anyRequest().permitAll()) // или другие роли
+                            .requestMatchers(rootUrl + "/**").hasRole("MODERATOR")
+                            .anyRequest().permitAll())
                     .formLogin(login -> login
-                            .loginPage("/mod_auth")
+                            .loginPage(authUrl)
                             .permitAll()
-                            .loginProcessingUrl("/mod_auth/process_login")
-                            .defaultSuccessUrl(managementRoot)
-                            .failureUrl("/mod_auth?error=true"))
+                            .loginProcessingUrl(loginUrl)
+                            .defaultSuccessUrl(rootUrl)
+                            .failureUrl(authUrl + "?error=true"))
                     .exceptionHandling(handling -> handling
-                            .accessDeniedPage("/man_access_denied"))
+                            .accessDeniedPage(accessDeniedUrl))
                     .csrf(AbstractHttpConfigurer::disable);
             return http.build();
         }
@@ -74,23 +109,31 @@ public class SecurityConfig {
     @Order(3)
     public static class wwConfigurationAdapter {
         @Value("${app.endpoints.warehouse.main}")
-        private String warehouseRoot;
+        private String rootUrl;
+
+        @Value("${app.endpoints.auth.wh_worker.main}")
+        private String authUrl;
+        @Value("${app.endpoints.auth.wh_worker.login}")
+        private String loginUrl;
+
+        @Value("${app.endpoints.errors.access_denied.warehouse}")
+        private String accessDeniedUrl;
 
         @Bean
         SecurityFilterChain wwFilterChain(HttpSecurity http) throws Exception {
             http
-                    .securityMatcher("/ww_auth/**", warehouseRoot + "/**")
+                    .securityMatcher(authUrl + "/**", rootUrl + "/**")
                     .authorizeHttpRequests(authorize -> authorize
-                            .requestMatchers(warehouseRoot + "/**").hasRole("WH_WORKER")
-                            .anyRequest().permitAll()) // или другие роли
+                            .requestMatchers(rootUrl + "/**").hasRole("WH_WORKER")
+                            .anyRequest().permitAll())
                     .formLogin(login -> login
-                            .loginPage("/ww_auth")
+                            .loginPage(authUrl)
                             .permitAll()
-                            .loginProcessingUrl("/ww_auth/process_login")
-                            .defaultSuccessUrl(warehouseRoot)
-                            .failureUrl("/ww_auth?error=true"))
+                            .loginProcessingUrl(loginUrl)
+                            .defaultSuccessUrl(rootUrl)
+                            .failureUrl(authUrl + "?error=true"))
                     .exceptionHandling(handling -> handling
-                            .accessDeniedPage("/wh_access_denied"))
+                            .accessDeniedPage(accessDeniedUrl))
                     .csrf(AbstractHttpConfigurer::disable);
             return http.build();
         }

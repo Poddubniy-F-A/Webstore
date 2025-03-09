@@ -4,25 +4,24 @@ import com.webstore.entities.Good;
 import com.webstore.exceptions.GoodNotFoundException;
 import com.webstore.services.shop.GoodsService;
 import com.webstore.services.shop.customer.FeedbacksService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
-@AllArgsConstructor
-@RequestMapping("/catalog")
+@RequiredArgsConstructor
 public class CatalogController {
-    private GoodsService goodsService;
-    private FeedbacksService feedbacksService;
 
-    @GetMapping
+    private final GoodsService goodsService;
+    private final FeedbacksService feedbacksService;
+
+    @GetMapping(value = "${app.endpoints.catalog.main}")
     public String catalogPage(
             Model model,
             @RequestParam(required = false) String sort,
@@ -75,7 +74,7 @@ public class CatalogController {
         return "shop/catalog/catalog";
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "${app.endpoints.catalog.main}/{id}")
     public String goodPage(Model model, @PathVariable Long id) throws GoodNotFoundException {
         //transaction
         Good good = goodsService.getGoodById(id);

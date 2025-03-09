@@ -2,26 +2,29 @@ package com.webstore.controllers;
 
 import com.webstore.exceptions.NotUniqueLoginException;
 import com.webstore.services.RegistrationService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@AllArgsConstructor
-@RequestMapping
+@RequiredArgsConstructor
 public class AuthController {
-    private RegistrationService service;
 
-    @GetMapping("/cust_auth/registration")
+    @Value("${app.endpoints.auth.customer.main}")
+    private String custAuthUrl;
+
+    private final RegistrationService service;
+
+    @GetMapping(value = "${app.endpoints.auth.customer.registration}")
     public String regPage() {
         return "auth/registration";
     }
 
-    @PostMapping("/cust_auth/registration")
+    @PostMapping(value = "${app.endpoints.auth.customer.registration}")
     public String regTry(
             Model model,
             @RequestParam String login,
@@ -30,26 +33,26 @@ public class AuthController {
     ) {
         try {
             service.register(login, password, nick);
-            return "redirect:/cust_auth/enter";
+            return "redirect:" + custAuthUrl;
         } catch (NotUniqueLoginException e) {
-            model.addAttribute("error_message", "Логин уже занят");
+            model.addAttribute("errorMessage", "Логин уже занят");
             return "auth/registration";
         }
     }
 
-    @GetMapping("cust_auth/enter")
+    @GetMapping(value = "${app.endpoints.auth.customer.main}")
     public String custAuthPage(Model model, @RequestParam(required = false) Boolean error) {
         handleEnteringError(model, error);
         return "auth/login/cust-login";
     }
 
-    @GetMapping("/mod_auth")
+    @GetMapping(value = "${app.endpoints.auth.moderator.main}")
     public String modAuthPage(Model model, @RequestParam(required = false) Boolean error) {
         handleEnteringError(model, error);
         return "auth/login/mod-login";
     }
 
-    @GetMapping("/ww_auth")
+    @GetMapping(value = "${app.endpoints.auth.wh_worker.main}")
     public String wwAuthPage(Model model, @RequestParam(required = false) Boolean error) {
         handleEnteringError(model, error);
         return "auth/login/ww-login";
@@ -57,21 +60,21 @@ public class AuthController {
 
     private void handleEnteringError(Model model, Boolean error) {
         if (error != null) {
-            model.addAttribute("error_message", "Неправильный логин или пароль");
+            model.addAttribute("errorMessage", "Неправильный логин или пароль");
         }
     }
 
-    @GetMapping("/cat_access_denied")
+    @GetMapping(value = "${app.endpoints.errors.access_denied.cust_service}")
     public String catalogAccessDenied() {
         return "errors/access-denied/catalog";
     }
 
-    @GetMapping("/man_access_denied")
+    @GetMapping(value = "${app.endpoints.errors.access_denied.management}")
     public String managementAccessDenied() {
         return "errors/access-denied/management";
     }
 
-    @GetMapping("/wh_access_denied")
+    @GetMapping(value = "${app.endpoints.errors.access_denied.warehouse}")
     public String warehouseAccessDenied() {
         return "errors/access-denied/warehouse";
     }

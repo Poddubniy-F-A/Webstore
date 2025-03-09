@@ -42,9 +42,9 @@
     <div class="user-info">
         <img src="https://drive.google.com/thumbnail?id=1Gnb0a01v1naKcpv-UjXRQqQcFUXA4URH" alt="User Image">
         <span th:text="${#authentication.principal.nick}"></span>
-        <a href="/customer/cart" class="button">Корзина</a>
-        <a href="/catalog" class="button">К каталогу</a>
-        <form th:method="post" th:action="@{/logout}">
+        <a th:href="${@environment.getProperty('app.endpoints.cart.main')}" class="button">Корзина</a>
+        <a th:href="${@environment.getProperty('app.endpoints.catalog.main')}" class="button">К каталогу</a>
+        <form th:method="post" th:action="${@environment.getProperty('app.endpoints.auth.logout')}">
             <button type="submit" class="button">Выйти</button>
         </form>
     </div>
@@ -68,10 +68,14 @@
             <td th:text="${entry.value.text}"></td>
             <td th:text="${entry.value.rate}"></td>
             <td>
-                <a th:href="@{/catalog/{id}(id=${entry.key.id})}">На страницу товара</a>
+                <a th:href="@{${@environment.getProperty('app.endpoints.catalog.main') + '/' + entry.key.id}}">
+                    На страницу товара
+                </a>
             </td>
             <td>
-                <a th:href="@{feedbacks/edit/{id}(id=${entry.key.id})}">Изменить отзыв</a>
+                <a th:href="@{${@environment.getProperty('app.endpoints.feedbacks.editing') + '/' + entry.key.id}}">
+                    Изменить отзыв
+                </a>
             </td>
         </tr>
         </tbody>
@@ -96,10 +100,14 @@
             <td th:text="${good.brand}"></td>
             <td th:text="${good.price}"></td>
             <td>
-                <a th:href="@{/catalog/{id}(id=${good.id})}">На страницу товара</a>
+                <a th:href="@{${@environment.getProperty('app.endpoints.catalog.main') + '/' + good.id}}">
+                    На страницу товара
+                </a>
             </td>
             <td>
-                <a th:href="@{feedbacks/create/{id}(id=${good.id})}">Сделать отзыв</a>
+                <a th:href="@{${@environment.getProperty('app.endpoints.feedbacks.creating') + '/' + good.id}}">
+                    Оставить отзыв
+                </a>
             </td>
         </tr>
         </tbody>

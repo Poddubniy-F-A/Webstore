@@ -4,27 +4,33 @@ import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 import com.webstore.services.shop.PaymentService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.math.BigDecimal;
 
 @Controller
-@AllArgsConstructor
-@RequestMapping("/pay")
+@RequiredArgsConstructor
 public class PaymentController {
+
+    @Value("${app.host}")
+    String hostUrl;
+
+    @Value("${app.endpoints.cart.canceled_payment}")
+    String canceledPaymentUrl;
+    @Value("${app.endpoints.cart.successful_payment}")
+    String successfulPaymentUrl;
+    @Value("${app.endpoints.cart.main}")
+    String cartUrl;
 
     private final PaymentService payPalService;
 
-    @GetMapping
-    public RedirectView pay(
-            @RequestParam BigDecimal amount,
-            @RequestParam String currency
-    ) {
+    @GetMapping(value = "${app.endpoints.payment}")
+    public RedirectView pay(@RequestParam BigDecimal amount, @RequestParam String currency) {
         try {
             // Создаем платеж с помощью PayPalService
             Payment payment = payPalService.createPayment(
@@ -33,8 +39,8 @@ public class PaymentController {
                     "paypal",
                     "sale",
                     "Оплата заказа",
-                    "http://localhost:8080/customer/cart/cancel",
-                    "http://localhost:8080/customer/cart/success"
+                    hostUrl + canceledPaymentUrl,
+                    hostUrl + successfulPaymentUrl
             );
 
             // Получаем URL для перенаправления пользователя на PayPal
@@ -49,6 +55,6 @@ public class PaymentController {
         }
 
         // В случае ошибки перенаправляем на главную страницу
-        return new RedirectView("http://localhost:8080/customer/cart");
+        return new RedirectView(hostUrl + cartUrl);
     }
 }

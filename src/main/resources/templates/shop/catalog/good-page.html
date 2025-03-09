@@ -87,18 +87,18 @@
 
 <div class="top-right">
     <div sec:authorize="!hasRole('CUSTOMER')">
-        <a href="/cust_auth/enter" class="button">Войти</a>
-        <a href="/cust_auth/registration" class="button">Регистрация</a>
-        <p sec:authorize="isAuthenticated()">У вас нет доступа к покупательским сервисам</p>
+        <a th:href="${@environment.getProperty('app.endpoints.auth.customer.main')}" class="button">Войти</a>
+        <a th:href="${@environment.getProperty('app.endpoints.auth.customer.register')}" class="button">Регистрация</a>
+        <p sec:authorize="isAuthenticated()">У вас нет доступа к покупательским сервисам!</p>
     </div>
 
     <div sec:authorize="hasRole('CUSTOMER')">
         <div class="user-info">
             <img src="https://drive.google.com/thumbnail?id=1Gnb0a01v1naKcpv-UjXRQqQcFUXA4URH" alt="User Image">
             <span th:text="${#authentication.principal.user.nick}"></span>
-            <a href="/customer/cart" class="button">Корзина</a>
-            <a href="/customer/feedbacks" class="button">Оставить отзыв</a>
-            <form th:method="post" th:action="@{/logout}">
+            <a th:href="${@environment.getProperty('app.endpoints.cart.main')}" class="button">Корзина</a>
+            <a th:href="${@environment.getProperty('app.endpoints.feedbacks.main')}" class="button">Оставить отзыв</a>
+            <form th:method="post" th:action="${@environment.getProperty('app.endpoints.auth.logout')}">
                 <button type="submit" class="button">Выйти</button>
             </form>
         </div>
@@ -119,7 +119,7 @@
                 <p><strong>Название:</strong> <span th:text="${good.label}"></span></p>
                 <p><strong>Бренд:</strong> <span th:text="${good.brand}"></span></p>
                 <p><strong>Категория:</strong> <span th:text="${good.category}"></span></p>
-                <p><strong>Цена:</strong> <span th:text="${good.price} + '₽'"></span></p>
+                <p><strong>Цена:</strong> <span th:text="${good.price} + '$'"></span></p>
                 <p><strong>На складе:</strong> <span th:text="${good.count}"></span></p>
                 <p><strong>Заказывалось:</strong> <span th:text="${good.ordersCount}"></span></p>
                 <p><strong>Рейтинг:</strong> <span th:text="${good.rate}"></span></p>
@@ -145,7 +145,7 @@
 
             <div sec:authorize="hasRole('CUSTOMER')">
                 <div th:if="${good.count > 0}" class="add-to-cart">
-                    <form th:action="@{/customer/cart/add/{id}(id=${good.id})}" method="get">
+                    <form th:action="@{${@environment.getProperty('app.endpoints.cart.adding') + '/' + good.id}}" method="post">
                         <button type="submit">Добавить в корзину</button>
                     </form>
                 </div>

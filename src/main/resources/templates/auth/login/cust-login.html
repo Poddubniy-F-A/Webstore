@@ -5,6 +5,6 @@
   <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<div th:replace="auth/login/login-template :: login(link='/cust_auth/process_login')"></div>
+<div th:replace="auth/login/login-template :: login(link=${@environment.getProperty('app.endpoints.auth.customer.login')})"></div>
 </body>
 </html>

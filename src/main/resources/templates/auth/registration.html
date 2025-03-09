@@ -7,8 +7,8 @@
 <body>
 <div class="login-container">
     <h2 style="text-align: center;">Регистрация</h2>
-    <div th:if="${error_message}" class="error-message" th:text="${error_message}"></div>
-    <form th:action="@{/cust_auth/registration}" method="post">
+    <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
+    <form th:action="${@environment.getProperty('app.endpoints.auth.customer.registration')}" method="post">
         <div>
             <label for="login">Логин:</label>
             <input type="text" id="login" name="login" required>

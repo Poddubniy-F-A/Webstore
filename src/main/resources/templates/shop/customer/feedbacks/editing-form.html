@@ -101,10 +101,10 @@
     <div class="user-info">
         <img src="https://drive.google.com/thumbnail?id=1Gnb0a01v1naKcpv-UjXRQqQcFUXA4URH" alt="User Image">
         <span th:text="${#authentication.principal.nick}"></span>
-        <a href="/customer/cart" class="button">Корзина</a>
-        <a href="/customer/feedbacks" class="button">Оставить отзыв</a>
-        <a href="/catalog" class="button">К каталогу</a>
-        <form th:method="post" th:action="@{/logout}">
+        <a th:href="${@environment.getProperty('app.endpoints.cart.main')}" class="button">Корзина</a>
+        <a th:href="${@environment.getProperty('app.endpoints.feedbacks.main')}" class="button">Оставить отзыв</a>
+        <a th:href="${@environment.getProperty('app.endpoints.catalog.main')}" class="button">К каталогу</a>
+        <form th:method="post" th:action="${@environment.getProperty('app.endpoints.auth.logout')}">
             <button type="submit" class="button">Выйти</button>
         </form>
     </div>
@@ -127,7 +127,7 @@
             </div>
             <div class="feedbacks">
                 <div class="add-to-cart">
-                    <form th:action="@{/customer/feedbacks/edit/{id}(id=${good.id})}" method="post">
+                    <form th:action="@{${@environment.getProperty('app.endpoints.feedbacks.editing') + '/' + good.id}}" method="post">
                         <h2>Отзыв</h2>
                         <div class="rating">
                             <label for="stars">Количество звезд:</label>

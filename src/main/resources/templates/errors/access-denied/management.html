@@ -9,8 +9,10 @@
 <div class="body">
     <h1>В доступе отказано</h1>
     <h3>У вас нет права доступа к модераторской</h3>
-    <a href="/index" class="button">Вернуться на главную</a>
-    <a th:href="@{/mod_auth}" class="button">Авторизоваться повторно</a>
+    <a th:href="${@environment.getProperty('app.endpoints.main')}" class="button">Вернуться на главную</a>
+    <a th:href="${@environment.getProperty('app.endpoints.auth.moderator.main')}" class="button">
+        Авторизоваться повторно
+    </a>
 </div>
 </body>
 </html>

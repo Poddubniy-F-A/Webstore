@@ -57,9 +57,9 @@
     <div class="user-info">
         <img src="https://drive.google.com/thumbnail?id=1Gnb0a01v1naKcpv-UjXRQqQcFUXA4URH" alt="User Image">
         <span th:text="${#authentication.principal.nick}"></span>
-        <a href="/customer/feedbacks" class="button">Оставить отзыв</a>
-        <a href="/catalog" class="button">К каталогу</a>
-        <form th:method="post" th:action="@{/logout}">
+        <a th:href="${@environment.getProperty('app.endpoints.feedbacks.main')}" class="button">Оставить отзыв</a>
+        <a th:href="${@environment.getProperty('app.endpoints.catalog.main')}" class="button">К каталогу</a>
+        <form th:method="post" th:action="${@environment.getProperty('app.endpoints.auth.logout')}">
             <button type="submit" class="button">Выйти</button>
         </form>
     </div>
@@ -85,17 +85,21 @@
                 <td th:text="${entry.key.price * entry.value}"></td>
                 <td th:text="${entry.key.count}"></td>
                 <td>
-                    <form th:action="@{/customer/cart/edit/{id}(id=${entry.key.id})}" method="post">
+                    <form th:action="@{${@environment.getProperty('app.endpoints.cart.editing') + '/' + entry.key.id}}" method="post">
                         <input type="number" name="quantity" min="1" th:value="${entry.value}" th:max="${entry.key.count}" required onchange="this.form.submit()">
                     </form>
                 </td>
 
                 <td>
-                    <form th:action="@{/customer/cart/delete/{id}(id=${entry.key.id})}" method="post">
+                    <form th:action="@{${@environment.getProperty('app.endpoints.cart.deleting') + '/' + entry.key.id}}" method="post">
                         <button type="submit">Удалить</button>
                     </form>
                 </td>
-                <td><a th:href="@{/catalog/{id}(id=${entry.key.id})}">На страницу товара</a></td>
+                <td>
+                    <a th:href="@{${@environment.getProperty('app.endpoints.catalog.main') + '/' + entry.key.id}}">
+                        На страницу товара
+                    </a>
+                </td>
             </tr>
             </tbody>
         </table>
@@ -104,7 +108,7 @@
 
 <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
 <div class="add-to-cart" th:if="${not #maps.isEmpty(cart)}">
-    <form th:action="@{/customer/cart/checkout}" method="post">
+    <form th:action="${@environment.getProperty('app.endpoints.cart.validating')}" method="post">
         <button type="submit">Оформить заказ</button>
     </form>
 </div>

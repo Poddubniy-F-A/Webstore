@@ -18,7 +18,24 @@ spring:
 
 
 app:
+  host: http://localhost:8080
+
   endpoints:
+    main: /index
+
+    auth:
+      moderator:
+        main: /mod_auth
+        login: /mod_auth/process_login
+      wh_worker:
+        main: /ww_auth
+        login: /ww_auth/process_login
+      customer:
+        main: /cust_auth
+        login: /cust_auth/process_login
+        registration: /cust_auth/register
+      logout: /logout
+
     management:
       main: /management
       creating: /management/create
@@ -29,14 +46,25 @@ app:
 
     catalog:
       main: /catalog
-      good-page: /catalog/{id}
 
-    customer:
-      cart:
-        main: /customer/cart
-      feedbacks:
-        main: /customer/feedbacks
+    cart:
+      main: /cart
+      adding: /cart/add
+      editing: /cart/edit
+      deleting: /cart/delete
+      validating: /cart/checkout
+      successful_payment: /cart/success
+      canceled_payment: /cart/cancel
 
-    mod_auth:
-      enter: /mod_auth/enter
-      process_login: /mod_auth/process_login
+    feedbacks:
+      main: /feedbacks
+      creating: /feedbacks/create
+      editing: /feedbacks/edit
+
+    payment: /pay
+
+    errors:
+      access_denied:
+        cust_service: /cust_access_denied
+        management: /man_access_denied
+        warehouse: /wh_access_denied

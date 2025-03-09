@@ -31,7 +31,7 @@
 
 <body>
 <div class="welcome">Добро пожаловать в МойМагазин!</div>
-<a href="/catalog" class="button bottom">К каталогу</a>
+<a th:href="${@environment.getProperty('app.endpoints.catalog.main')}" class="button bottom">К каталогу</a>
 <div class="top-right">
     <a th:href="${@environment.getProperty('app.endpoints.management.main')}" class="button">В модераторскую</a>
     <br>

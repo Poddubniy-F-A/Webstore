@@ -2,16 +2,20 @@ package com.webstore.controllers.admin;
 
 import com.webstore.exceptions.GoodNotFoundException;
 import com.webstore.services.shop.GoodsService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ManagementController {
 
-    private GoodsService service;
+    @Value("${app.endpoints.management.main}")
+    private String rootUrl;
+
+    private final GoodsService service;
 
     @GetMapping(value = "${app.endpoints.management.main}")
     public String managementPage(Model model) {
@@ -34,7 +38,7 @@ public class ManagementController {
             @RequestParam int price
     ) {
         service.addGood(picturePath, label, description, brand, category, price);
-        return "redirect:/${app.endpoints.management.main}";
+        return "redirect:" + rootUrl;
     }
 
     @GetMapping(value = "${app.endpoints.management.editing}/{id}")
@@ -54,6 +58,6 @@ public class ManagementController {
             @RequestParam int price
     ) throws GoodNotFoundException {
         service.updateGood(id, picturePath, label, description, brand, category, price);
-        return "redirect:/${app.endpoints.management.main}";
+        return "redirect:" + rootUrl;
     }
 }
