@@ -1,14 +1,10 @@
 package com.webstore.controllers.shop.customer;
 
-import com.paypal.api.payments.Links;
-import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
-import com.webstore.entities.Good;
 import com.webstore.exceptions.DisapprovedPaymentException;
-import com.webstore.services.shop.customer.PaymentService;
 import com.webstore.utils.Cart;
 import com.webstore.exceptions.GoodNotFoundException;
-import com.webstore.exceptions.IllegalCartConditionException;
+import com.webstore.exceptions.InvalidCartConditionException;
 import com.webstore.exceptions.IllegalGoodsCountException;
 import com.webstore.services.shop.customer.CartService;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
-
-import java.math.BigDecimal;
-import java.util.HashMap;
 
 import static com.webstore.security.MyUserDetailsService.userFromContext;
 
@@ -31,7 +24,7 @@ public class CartController {
             GOOD_COUNT_ERROR_CODE = "good_count",
             PAYPAL_ERROR_CODE = "paypal",
             CANCELED_PAYMENT_ERROR_CODE = "canceled_payment",
-            PAYMENT_ERROR_CODE = "payment";
+            DISAPPROVED_PAYMENT_ERROR_CODE = "payment";
 
     @Value("${app.endpoints.cart.main}")
     String rootUrl;
@@ -47,15 +40,13 @@ public class CartController {
     String successfulPaymentUrl;
 
     private final CartService service;
-    private final PaymentService paymentService;
 
     private final Cart cart;
 
     @GetMapping(value = "${app.endpoints.cart.main}")
     public String cartPage(
-            Model model,
-            @RequestParam(value = ERROR_PARAM_NAME, required = false) String error
-    ) throws IllegalCartConditionException {
+            Model model, @RequestParam(value = ERROR_PARAM_NAME, required = false) String error
+    ) throws InvalidCartConditionException {
         if (error != null) {
             switch (error) {
                 case GOOD_COUNT_ERROR_CODE -> model.addAttribute(
@@ -66,13 +57,13 @@ public class CartController {
                         "errorMessage",
                         "Ошибка при обработке оплаты (PayPal)."
                 );
+                case DISAPPROVED_PAYMENT_ERROR_CODE -> model.addAttribute(
+                        "errorMessage",
+                        "Ошибка при оплате"
+                );
                 case CANCELED_PAYMENT_ERROR_CODE -> model.addAttribute(
                         "errorMessage",
                         "Оплата отменена."
-                );
-                case PAYMENT_ERROR_CODE -> model.addAttribute(
-                        "errorMessage",
-                        "Ошибка при оплате"
                 );
             }
         }
@@ -99,51 +90,36 @@ public class CartController {
     }
 
     @PostMapping(value = "${app.endpoints.cart.validating}")
-    public RedirectView checkout() throws IllegalCartConditionException {
-        HashMap<Good, Integer> goodsCart = service.getGoodsCart(cart);
+    public RedirectView checkout() throws InvalidCartConditionException {
         try {
-            service.validateCart(goodsCart);
-        } catch (IllegalGoodsCountException e) {
-            return new RedirectView(hostUrl + rootUrl + errorParam(GOOD_COUNT_ERROR_CODE));
-        }
-
-        try {
-            Payment payment = paymentService.createPayment(
-                    goodsCart.entrySet().stream()
-                            .map(entry -> BigDecimal.valueOf((long) entry.getValue() * entry.getKey().getPrice()))
-                            .reduce(BigDecimal.ZERO, BigDecimal::add),
-                    "USD",
-                    "paypal",
-                    "sale",
-                    "Оплата заказа",
+            return new RedirectView(service.getPaymentUrl(
+                    cart,
                     hostUrl + canceledPaymentUrl,
                     hostUrl + successfulPaymentUrl
-            );
-            for (Links link : payment.getLinks()) {
-                if (link.getRel().equals("approval_url")) {
-                    return new RedirectView(link.getHref());
-                }
-            }
-            return new RedirectView(hostUrl + rootUrl + errorParam(PAYPAL_ERROR_CODE));
+            ));
+        } catch (IllegalGoodsCountException e) {
+            return new RedirectView(hostUrl + rootUrl + errorParam(GOOD_COUNT_ERROR_CODE));
         } catch (PayPalRESTException e) {
             return new RedirectView(hostUrl + rootUrl + errorParam(PAYPAL_ERROR_CODE));
+        } catch (DisapprovedPaymentException e) {
+            return new RedirectView(hostUrl + rootUrl + errorParam(DISAPPROVED_PAYMENT_ERROR_CODE));
         }
     }
 
     @GetMapping(value = "${app.endpoints.cart.successful_payment}")
     public String successfulPayment(
             @RequestParam("paymentId") String paymentId, @RequestParam("PayerID") String payerId
-    ) throws IllegalCartConditionException {
+    ) throws InvalidCartConditionException {
         try {
-            service.handleBuy(cart, userFromContext(), paymentService.executePayment(paymentId, payerId));
+            service.handleBuy(cart, userFromContext(), paymentId, payerId);
             cart.cleanCart();
             return "redirect:" + rootUrl;
-        } catch (PayPalRESTException e) {
-            return "redirect:" + rootUrl + errorParam(PAYPAL_ERROR_CODE);
         } catch (IllegalGoodsCountException e) {
             return "redirect:" + rootUrl + errorParam(GOOD_COUNT_ERROR_CODE);
+        } catch (PayPalRESTException e) {
+            return "redirect:" + rootUrl + errorParam(PAYPAL_ERROR_CODE);
         } catch (DisapprovedPaymentException e) {
-            return "redirect:" + rootUrl + errorParam(PAYMENT_ERROR_CODE);
+            return "redirect:" + rootUrl + errorParam(DISAPPROVED_PAYMENT_ERROR_CODE);
         }
     }
 
@@ -152,7 +128,7 @@ public class CartController {
         return "redirect:" + rootUrl + errorParam(CANCELED_PAYMENT_ERROR_CODE);
     }
 
-    private String errorParam(String errorCode) {
+    private static String errorParam(String errorCode) {
         return "?" + ERROR_PARAM_NAME + "=" + errorCode;
     }
 }

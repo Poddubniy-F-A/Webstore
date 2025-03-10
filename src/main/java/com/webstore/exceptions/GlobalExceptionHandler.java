@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
         return new ModelAndView("errors/feedback-not-exists");
     }
 
-    @ExceptionHandler(IllegalCartConditionException.class)
+    @ExceptionHandler(InvalidCartConditionException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ModelAndView handleIllegalCartCondition() {
         return new ModelAndView("errors/illegal-cart-condition");
