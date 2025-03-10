@@ -45,7 +45,7 @@
 <div class="top-right">
     <div sec:authorize="!hasRole('CUSTOMER')">
         <a th:href="${@environment.getProperty('app.endpoints.auth.customer.main')}" class="button">Войти</a>
-        <a th:href="${@environment.getProperty('app.endpoints.auth.customer.register')}" class="button">Регистрация</a>
+        <a th:href="${@environment.getProperty('app.endpoints.auth.customer.registration')}" class="button">Регистрация</a>
         <p sec:authorize="isAuthenticated()">У вас нет доступа к покупательским сервисам!</p>
     </div>
 

@@ -1,5 +1,7 @@
 package com.webstore.services.shop.customer;
 
+import com.paypal.api.payments.Payment;
+import com.webstore.exceptions.DisapprovedPaymentException;
 import com.webstore.utils.Cart;
 import com.webstore.entities.Good;
 import com.webstore.entities.Order;
@@ -24,13 +26,14 @@ public class CartService {
     private OrdersRepository ordersRepository;
 
     @Transactional
-    public void handleBuy(Cart cart, User user) throws IllegalCartConditionException, IllegalGoodsCountException {
-        for (Entry<Good, Integer> entry : getGoodsCart(cart).entrySet()) {
+    public void handleBuy(
+            Cart cart, User user, Payment payment
+    ) throws IllegalCartConditionException, IllegalGoodsCountException, DisapprovedPaymentException {
+        HashMap<Good, Integer> goodsCart = getGoodsCart(cart);
+        validateCart(goodsCart);
+        for (Entry<Good, Integer> entry : goodsCart.entrySet()) {
             Good good = entry.getKey();
             int count = entry.getValue();
-            if (count > good.getCount()) {
-                throw new IllegalGoodsCountException();
-            }
 
             Order order = new Order();
             order.setGood(good);
@@ -41,6 +44,18 @@ public class CartService {
             good.setCount(good.getCount() - count);
             good.setOrdersCount(good.getOrdersCount() + 1);
             goodsRepository.save(good);
+        }
+
+        if (!payment.getState().equals("approved")) {
+            throw new DisapprovedPaymentException();
+        }
+    }
+
+    public void validateCart(HashMap<Good, Integer> goodsCart) throws IllegalGoodsCountException {
+        for (Entry<Good, Integer> entry : goodsCart.entrySet()) {
+            if (entry.getValue() > entry.getKey().getCount()) {
+                throw new IllegalGoodsCountException();
+            }
         }
     }
 

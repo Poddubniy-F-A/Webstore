@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class AuthController {
 
     @Value("${app.endpoints.auth.customer.main}")
-    private String custAuthUrl;
+    String custAuthUrl;
 
     private final RegistrationService service;
 

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public class ManagementController {
 
     @Value("${app.endpoints.management.main}")
-    private String rootUrl;
+    String rootUrl;
 
     private final GoodsService service;
 
@@ -47,7 +47,7 @@ public class ManagementController {
         return "admin/management/editing-form";
     }
 
-    @PostMapping(value = "${app.endpoints.management.editing}/{id}")
+    @PutMapping(value = "${app.endpoints.management.editing}/{id}")
     public String editGood(
             @RequestParam Long id,
             @RequestParam("pp") String picturePath,

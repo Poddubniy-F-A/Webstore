@@ -145,7 +145,7 @@
 
             <div sec:authorize="hasRole('CUSTOMER')">
                 <div th:if="${good.count > 0}" class="add-to-cart">
-                    <form th:action="@{${@environment.getProperty('app.endpoints.cart.adding') + '/' + good.id}}" method="post">
+                    <form th:action="@{${@environment.getProperty('app.endpoints.cart.main')} (id=${good.id})}" method="post">
                         <button type="submit">Добавить в корзину</button>
                     </form>
                 </div>

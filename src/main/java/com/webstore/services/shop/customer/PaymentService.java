@@ -1,4 +1,4 @@
-package com.webstore.services.shop;
+package com.webstore.services.shop.customer;
 
 import com.paypal.api.payments.*;
 import com.paypal.base.rest.PayPalRESTException;

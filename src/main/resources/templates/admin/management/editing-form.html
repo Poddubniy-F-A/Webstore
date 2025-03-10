@@ -47,6 +47,7 @@
 <div class="form-container">
     <h2 style="text-align: center;">Карточка товара</h2>
     <form method="post">
+        <input type="hidden" name="_method" value="put"/>
         <div>
             <label for="id">id</label>
             <input readonly type="number" id="id" name="id" th:value="${good.id}">

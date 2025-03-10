@@ -95,6 +95,7 @@
     </style>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
+
 <body>
 
 <div class="top-right">
@@ -128,6 +129,7 @@
             <div class="feedbacks">
                 <div class="add-to-cart">
                     <form th:action="@{${@environment.getProperty('app.endpoints.feedbacks.editing') + '/' + good.id}}" method="post">
+                        <input type="hidden" name="_method" value="put"/>
                         <h2>Отзыв</h2>
                         <div class="rating">
                             <label for="stars">Количество звезд:</label>

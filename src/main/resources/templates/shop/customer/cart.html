@@ -85,13 +85,15 @@
                 <td th:text="${entry.key.price * entry.value}"></td>
                 <td th:text="${entry.key.count}"></td>
                 <td>
-                    <form th:action="@{${@environment.getProperty('app.endpoints.cart.editing') + '/' + entry.key.id}}" method="post">
+                    <form th:action="@{${@environment.getProperty('app.endpoints.cart.main')} (id=${entry.key.id})}" method="post">
+                        <input type="hidden" name="_method" value="put"/>
                         <input type="number" name="quantity" min="1" th:value="${entry.value}" th:max="${entry.key.count}" required onchange="this.form.submit()">
                     </form>
                 </td>
 
                 <td>
-                    <form th:action="@{${@environment.getProperty('app.endpoints.cart.deleting') + '/' + entry.key.id}}" method="post">
+                    <form th:action="@{${@environment.getProperty('app.endpoints.cart.main')} (id=${entry.key.id})}" method="post">
+                        <input type="hidden" name="_method" value="delete"/>
                         <button type="submit">Удалить</button>
                     </form>
                 </td>

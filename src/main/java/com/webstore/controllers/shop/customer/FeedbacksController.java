@@ -24,7 +24,7 @@ import static com.webstore.security.MyUserDetailsService.userFromContext;
 public class FeedbacksController {
 
     @Value("${app.endpoints.feedbacks.main}")
-    private String rootUrl;
+    String rootUrl;
 
     private final FeedbacksService feedbacksService;
 
@@ -75,7 +75,7 @@ public class FeedbacksController {
         return "shop/customer/feedbacks/editing-form";
     }
 
-    @PostMapping(value = "${app.endpoints.feedbacks.editing}/{id}")
+    @PutMapping(value = "${app.endpoints.feedbacks.editing}/{id}")
     public String editFeedback(
             @PathVariable Long id,
             @RequestParam String review, @RequestParam int stars
