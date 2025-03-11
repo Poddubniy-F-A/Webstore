@@ -17,13 +17,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(FeedbackNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ModelAndView handleFeedbackNotFound() {
-        return new ModelAndView("errors/feedback-not-exists");
-    }
-
-    @ExceptionHandler(InvalidCartConditionException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ModelAndView handleIllegalCartCondition() {
-        return new ModelAndView("errors/illegal-cart-condition");
+        return new ModelAndView("errors/feedback-no-exists");
     }
 
     @ExceptionHandler(DuplicateFeedbackException.class)
