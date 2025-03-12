@@ -41,7 +41,7 @@ public class Cart {
 
     private void check() throws LockedCartException {
         if (isLocked) {
-            throw new LockedCartException(this);
+            throw new LockedCartException();
         }
     }
 

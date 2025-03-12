@@ -2,8 +2,8 @@ package com.webstore.controllers.admin;
 
 import com.webstore.exceptions.GoodNotFoundException;
 import com.webstore.services.admin.ManagementService;
+import com.webstore.utils.EndpointsURLs;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +13,7 @@ import org.springframework.web.servlet.view.RedirectView;
 @RequiredArgsConstructor
 public class ManagementController {
 
-    @Value("${app.endpoints.management.main}")
-    String rootUrl;
-
+    private final EndpointsURLs endpointsURLs;
     private final ManagementService service;
 
     @GetMapping(value = "${app.endpoints.management.main}")
@@ -39,7 +37,7 @@ public class ManagementController {
             @RequestParam int price
     ) {
         service.addGood(picturePath, label, description, brand, category, price);
-        return new RedirectView(rootUrl);
+        return new RedirectView(endpointsURLs.MANAGEMENT_MAIN);
     }
 
     @GetMapping(value = "${app.endpoints.management.editing}/{id}")
@@ -59,6 +57,6 @@ public class ManagementController {
             @RequestParam int price
     ) throws GoodNotFoundException {
         service.updateGood(id, picturePath, label, description, brand, category, price);
-        return new RedirectView(rootUrl);
+        return new RedirectView(endpointsURLs.MANAGEMENT_MAIN);
     }
 }

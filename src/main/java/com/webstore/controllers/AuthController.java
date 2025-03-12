@@ -2,26 +2,29 @@ package com.webstore.controllers;
 
 import com.webstore.exceptions.auth.NotUniqueLoginException;
 import com.webstore.services.RegistrationService;
+import com.webstore.utils.EndpointsURLs;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
 
-    @Value("${app.endpoints.auth.customer.main}")
-    String custAuthUrl;
+    public static final String
+            REG_ERROR_MESSAGE_ATTRIBUTE_NAME = "errorMessage",
+            AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME = "errorMessage";
 
+    private final EndpointsURLs endpointsURLs;
     private final RegistrationService service;
 
     @GetMapping(value = "${app.endpoints.auth.customer.registration}")
-    public String regPage() {
+    public String regPage(@ModelAttribute(REG_ERROR_MESSAGE_ATTRIBUTE_NAME) String errorMessage) {
         return "auth/registration";
     }
 
@@ -32,31 +35,40 @@ public class AuthController {
             @RequestParam String nick
     ) throws NotUniqueLoginException {
         service.register(login, password, nick);
-        return new RedirectView(custAuthUrl);
+        return new RedirectView(endpointsURLs.AUTH_CUSTOMER_MAIN);
     }
 
     @GetMapping(value = "${app.endpoints.auth.customer.main}")
-    public String custAuthPage(Model model, @RequestParam(required = false) Boolean error) {
-        handleLoginError(model, error);
+    public String custAuthPage(@ModelAttribute(AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME) String errorMessage) {
         return "auth/login/cust-login";
     }
 
     @GetMapping(value = "${app.endpoints.auth.moderator.main}")
-    public String modAuthPage(Model model, @RequestParam(required = false) Boolean error) {
-        handleLoginError(model, error);
+    public String modAuthPage(@ModelAttribute(AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME) String errorMessage) {
         return "auth/login/mod-login";
     }
 
     @GetMapping(value = "${app.endpoints.auth.wh_worker.main}")
-    public String wwAuthPage(Model model, @RequestParam(required = false) Boolean error) {
-        handleLoginError(model, error);
+    public String wwAuthPage(@ModelAttribute(AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME) String errorMessage) {
         return "auth/login/ww-login";
     }
 
-    private void handleLoginError(Model model, Boolean error) {
-        if (error != null) {
-            model.addAttribute("errorMessage", "Неправильный логин или пароль");
-        }
+    @GetMapping(value = "${app.endpoints.auth.customer.failure}")
+    public RedirectView custAuthPage(RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute(AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME, "Неверный логин или пароль");
+        return new RedirectView(endpointsURLs.AUTH_CUSTOMER_MAIN);
+    }
+
+    @GetMapping(value = "${app.endpoints.auth.moderator.failure}")
+    public RedirectView modAuthPage(RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute(AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME, "Неверный логин или пароль");
+        return new RedirectView(endpointsURLs.AUTH_MODERATOR_MAIN);
+    }
+
+    @GetMapping(value = "${app.endpoints.auth.wh_worker.failure}")
+    public RedirectView wwAuthPage(RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute(AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME, "Неверный логин или пароль");
+        return new RedirectView(endpointsURLs.AUTH_WH_WORKER_MAIN);
     }
 
     @GetMapping(value = "${app.endpoints.errors.access_denied.cust_service}")

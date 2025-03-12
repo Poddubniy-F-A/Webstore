@@ -66,8 +66,9 @@
 </div>
 
 <div class="product-container">
-    <h1 th:if="${#maps.isEmpty(cart)}">Ваша корзина пока пуста!</h1>
-    <div class="product-list" th:if="${not #maps.isEmpty(cart)}">
+    <h1 th:unless="${#strings.isEmpty(wasPurchase)}">Поздравляем с покупкой!</h1>
+    <h1 th:if="${#strings.isEmpty(wasPurchase) and #maps.isEmpty(cart)}">Ваша корзина пока пуста!</h1>
+    <div th:unless="${#maps.isEmpty(cart)}" class="product-list">
         <h2>Корзина</h2>
         <table>
             <thead>
@@ -108,8 +109,8 @@
     </div>
 </div>
 
-<div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
-<div class="add-to-cart" th:if="${not #maps.isEmpty(cart)}">
+<div th:unless="${#strings.isEmpty(errorMessage)}" class="error-message" th:text="${errorMessage}"></div>
+<div class="add-to-cart" th:unless="${#maps.isEmpty(cart)}">
     <form th:action="${@environment.getProperty('app.endpoints.cart.validating')}" method="post">
         <button type="submit">Оформить заказ</button>
     </form>

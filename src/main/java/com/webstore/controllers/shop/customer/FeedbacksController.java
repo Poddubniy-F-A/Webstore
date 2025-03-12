@@ -5,8 +5,8 @@ import com.webstore.exceptions.feedbacks.FeedbackNotFoundException;
 import com.webstore.exceptions.GoodNotFoundException;
 import com.webstore.exceptions.feedbacks.IllegalRatingTryException;
 import com.webstore.services.shop.customer.FeedbacksService;
+import com.webstore.utils.EndpointsURLs;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +18,7 @@ import static com.webstore.security.MyUserDetailsService.userFromContext;
 @RequiredArgsConstructor
 public class FeedbacksController {
 
-    @Value("${app.endpoints.feedbacks.main}")
-    String rootUrl;
-
+    private final EndpointsURLs endpointsURLs;
     private final FeedbacksService service;
 
     @GetMapping(value = "${app.endpoints.feedbacks.main}")
@@ -42,7 +40,7 @@ public class FeedbacksController {
             @RequestParam int stars
     ) throws GoodNotFoundException, IllegalRatingTryException {
         service.handleFeedbackCreating(userFromContext(), id, review, stars);
-        return new RedirectView(rootUrl);
+        return new RedirectView(endpointsURLs.FEEDBACKS_MAIN);
     }
 
     @GetMapping(value = "${app.endpoints.feedbacks.editing}/{id}")
@@ -65,6 +63,6 @@ public class FeedbacksController {
             @RequestParam int stars
     ) throws GoodNotFoundException, FeedbackNotFoundException {
         service.handleFeedbackEditing(userFromContext(), id, review, stars);
-        return new RedirectView(rootUrl);
+        return new RedirectView(endpointsURLs.FEEDBACKS_MAIN);
     }
 }

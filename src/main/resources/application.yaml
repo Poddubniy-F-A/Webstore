@@ -27,12 +27,15 @@ app:
       moderator:
         main: /mod_auth
         login: /mod_auth/process_login
+        failure: /mod_auth/fail
       wh_worker:
         main: /ww_auth
         login: /ww_auth/process_login
+        failure: /ww_auth/fail
       customer:
         main: /cust_auth
         login: /cust_auth/process_login
+        failure: /cust_auth/fail
         registration: /cust_auth/register
       logout: /logout
 

@@ -1,30 +1,32 @@
 package com.webstore.exceptions.cart;
 
 import com.webstore.exceptions.cart.payment.PaymentException;
-import com.webstore.utils.Cart;
+import com.webstore.utils.EndpointsURLs;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
+
+import static com.webstore.controllers.shop.customer.CartController.ERROR_MESSAGE_ATTRIBUTE_NAME;
 
 @ControllerAdvice
+@RequiredArgsConstructor
 public class CartExceptionHandler {
 
+    private final EndpointsURLs endpointsURLs;
+
     @ExceptionHandler(LockedCartException.class)
-    public ModelAndView handleLockedCart(LockedCartException e) {
-        ModelAndView modelAndView = new ModelAndView("shop/customer/cart");
-        modelAndView.getModel().put("errorMessage", "Дождитесь окончания оплаты");
-        modelAndView.getModel().put("cart", e.getCart().getCart());
-        return modelAndView;
+    public RedirectView handleLockedCart(RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute(ERROR_MESSAGE_ATTRIBUTE_NAME, "Дождитесь окончания оплаты");
+        return new RedirectView(endpointsURLs.CART_MAIN);
     }
 
     @ExceptionHandler(PaymentException.class)
-    public ModelAndView handlePayment(PaymentException e) {
-        Cart cart = e.getCart();
-        cart.unlock();
+    public RedirectView handleIncorrectPayment(PaymentException e, RedirectAttributes redirectAttributes) {
+        e.getCart().unlock();
 
-        ModelAndView modelAndView = new ModelAndView("shop/customer/cart");
-        modelAndView.getModel().put("errorMessage", e.getMessage());
-        modelAndView.getModel().put("cart", cart.getCart());
-        return modelAndView;
+        redirectAttributes.addFlashAttribute(ERROR_MESSAGE_ATTRIBUTE_NAME, e.getMessage());
+        return new RedirectView(endpointsURLs.CART_MAIN);
     }
 }

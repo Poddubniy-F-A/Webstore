@@ -4,11 +4,12 @@ import com.webstore.exceptions.GoodNotFoundException;
 import com.webstore.exceptions.cart.LockedCartException;
 import com.webstore.exceptions.cart.payment.PaymentException;
 import com.webstore.services.shop.customer.CartService;
+import com.webstore.utils.EndpointsURLs;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import static com.webstore.security.MyUserDetailsService.userFromContext;
@@ -17,30 +18,27 @@ import static com.webstore.security.MyUserDetailsService.userFromContext;
 @RequiredArgsConstructor
 public class CartController {
 
-    @Value("${app.endpoints.cart.main}")
-    String rootUrl;
-    @Value("${app.endpoints.catalog.main}")
-    String catalogUrl;
+    public static final String
+            WAS_PURCHASE_ATTRIBUTE_NAME = "wasPurchase",
+            ERROR_MESSAGE_ATTRIBUTE_NAME = "errorMessage";
 
-    @Value("${app.host}")
-    String hostUrl;
-
-    @Value("${app.endpoints.cart.canceled_payment}")
-    String canceledPaymentUrl;
-    @Value("${app.endpoints.cart.finished_payment}")
-    String finishedPaymentUrl;
-
+    private final EndpointsURLs endpointsURLs;
     private final CartService service;
 
     @GetMapping(value = "${app.endpoints.cart.main}")
-    public String cartPage(Model model) {
-        return filledCartPage(model);
+    public String cartPage(
+            Model model,
+            @ModelAttribute(WAS_PURCHASE_ATTRIBUTE_NAME) String wasPurchase,
+            @ModelAttribute(ERROR_MESSAGE_ATTRIBUTE_NAME) String errorMessage
+    ) {
+        model.addAttribute("cart", service.getCart());
+        return "shop/customer/cart";
     }
 
     @PostMapping(value = "${app.endpoints.cart.main}")
     public RedirectView addGoodToCart(@RequestParam Long id) throws GoodNotFoundException, LockedCartException { //
         service.addGoodToCart(id);
-        return new RedirectView(catalogUrl);
+        return new RedirectView(endpointsURLs.CATALOG_MAIN);
     }
 
     @PutMapping(value = "${app.endpoints.cart.main}")
@@ -49,46 +47,42 @@ public class CartController {
             @RequestParam int quantity
     ) throws GoodNotFoundException, LockedCartException { //
         service.setGoodCountInCart(id, quantity);
-        return new RedirectView(rootUrl);
+        return new RedirectView(endpointsURLs.CART_MAIN);
     }
 
     @DeleteMapping(value = "${app.endpoints.cart.main}")
     public RedirectView deleteGoodFromCart(@RequestParam Long id) throws GoodNotFoundException, LockedCartException { //
         service.removeFromCart(id);
-        return new RedirectView(rootUrl);
+        return new RedirectView(endpointsURLs.CART_MAIN);
     }
 
     @PostMapping(value = "${app.endpoints.cart.validating}")
     public RedirectView checkout() throws PaymentException {
         service.lockCart();
         return new RedirectView(service.getPaymentUrl(
-                hostUrl + canceledPaymentUrl,
-                hostUrl + finishedPaymentUrl
+                endpointsURLs.HOST + endpointsURLs.CART_CANCELED_PAYMENT,
+                endpointsURLs.HOST + endpointsURLs.CART_FINISHED_PAYMENT
         ));
     }
 
     @GetMapping(value = "${app.endpoints.cart.finished_payment}")
-    public String successfulPayment(
-            Model model,
+    public RedirectView successfulPayment(
             @RequestParam("paymentId") String paymentId,
-            @RequestParam("PayerID") String payerId
+            @RequestParam("PayerID") String payerId,
+            RedirectAttributes redirectAttributes
     ) throws PaymentException {
         service.handleBuy(userFromContext(), paymentId, payerId);
         service.refreshCart();
 
-        return filledCartPage(model);
+        redirectAttributes.addFlashAttribute(WAS_PURCHASE_ATTRIBUTE_NAME, "true");
+        return new RedirectView(endpointsURLs.CART_MAIN);
     }
 
     @GetMapping(value = "${app.endpoints.cart.canceled_payment}")
-    public String canceledPayment(Model model) {
+    public RedirectView canceledPayment(RedirectAttributes redirectAttributes) {
         service.unlockCart();
 
-        model.addAttribute("errorMessage", "Оплата отменена");
-        return filledCartPage(model);
-    }
-
-    private String filledCartPage(Model model) {
-        model.addAttribute("cart", service.getCart());
-        return "shop/customer/cart";
+        redirectAttributes.addFlashAttribute(ERROR_MESSAGE_ATTRIBUTE_NAME, "Оплата отменена");
+        return new RedirectView(endpointsURLs.CART_MAIN);
     }
 }
