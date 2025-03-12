@@ -15,6 +15,7 @@ import java.util.Collections;
 @Service
 @AllArgsConstructor
 public class MyUserDetailsService implements UserDetailsService {
+
     public static User userFromContext() {
         return ((MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
     }

@@ -29,25 +29,26 @@ public class SecurityConfig {
     @Configuration
     @Order(1)
     public static class CustomerConfigurationAdapter {
+
         @Value("${app.endpoints.catalog.main}")
-        private String catalogRootUrl;
+        String catalogRootUrl;
         @Value("${app.endpoints.cart.main}")
-        private String cartRootUrl;
+        String cartRootUrl;
         @Value("${app.endpoints.feedbacks.main}")
-        private String feedbacksRootUrl;
+        String feedbacksRootUrl;
 
         @Value("${app.endpoints.auth.customer.main}")
-        private String authUrl;
+        String authUrl;
         @Value("${app.endpoints.auth.customer.login}")
-        private String loginUrl;
+        String loginUrl;
 
         @Value("${app.endpoints.auth.logout}")
-        private String logoutUrl;
+        String logoutUrl;
         @Value("${app.endpoints.main}")
-        private String logoutSuccessUrl;
+        String logoutSuccessUrl;
 
         @Value("${app.endpoints.errors.access_denied.cust_service}")
-        private String accessDeniedUrl;
+        String accessDeniedUrl;
 
         @Bean
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -80,16 +81,17 @@ public class SecurityConfig {
     @Configuration
     @Order(2)
     public static class ModeratorConfigurationAdapter {
+
         @Value("${app.endpoints.management.main}")
-        private String rootUrl;
+        String rootUrl;
 
         @Value("${app.endpoints.auth.moderator.main}")
-        private String authUrl;
+        String authUrl;
         @Value("${app.endpoints.auth.moderator.login}")
-        private String loginUrl;
+        String loginUrl;
 
         @Value("${app.endpoints.errors.access_denied.management}")
-        private String accessDeniedUrl;
+        String accessDeniedUrl;
 
         @Bean
         SecurityFilterChain moderatorFilterChain(HttpSecurity http) throws Exception {
@@ -114,16 +116,17 @@ public class SecurityConfig {
     @Configuration
     @Order(3)
     public static class wwConfigurationAdapter {
+
         @Value("${app.endpoints.warehouse.main}")
-        private String rootUrl;
+        String rootUrl;
 
         @Value("${app.endpoints.auth.wh_worker.main}")
-        private String authUrl;
+        String authUrl;
         @Value("${app.endpoints.auth.wh_worker.login}")
-        private String loginUrl;
+        String loginUrl;
 
         @Value("${app.endpoints.errors.access_denied.warehouse}")
-        private String accessDeniedUrl;
+        String accessDeniedUrl;
 
         @Bean
         SecurityFilterChain wwFilterChain(HttpSecurity http) throws Exception {

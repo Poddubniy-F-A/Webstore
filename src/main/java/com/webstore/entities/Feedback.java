@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @Table(name = "feedbacks")
 public class Feedback {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,5 +26,5 @@ public class Feedback {
     private String text;
 
     @Column
-    private int rate;
+    private int rating;
 }

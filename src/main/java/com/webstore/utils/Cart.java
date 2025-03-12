@@ -1,7 +1,7 @@
 package com.webstore.utils;
 
 import com.webstore.entities.Good;
-import com.webstore.exceptions.LockedCartException;
+import com.webstore.exceptions.cart.LockedCartException;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
@@ -24,29 +24,29 @@ public class Cart {
         isLocked = false;
     }
 
-    public void addGoodToCart(Good good) throws LockedCartException {
+    public void addGood(Good good) throws LockedCartException {
         check();
         cart.put(good, 1);
     }
 
-    public void removeFromCart(Good good) throws LockedCartException {
+    public void removeGood(Good good) throws LockedCartException {
         check();
         cart.remove(good);
     }
 
-    public void setGoodCountInCart(Good good, int quantity) throws LockedCartException {
+    public void setGoodCount(Good good, int quantity) throws LockedCartException {
         check();
         cart.put(good, quantity);
     }
 
-    public void cleanCart() throws LockedCartException {
-        check();
-        cart.clear();
-    }
-
     private void check() throws LockedCartException {
         if (isLocked) {
-            throw new LockedCartException();
+            throw new LockedCartException(this);
         }
+    }
+
+    public void refresh() {
+        isLocked = false;
+        cart.clear();
     }
 }

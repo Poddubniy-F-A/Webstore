@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 @Table(name = "goods")
 public class Good {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,9 +36,16 @@ public class Good {
     @Column(name = "orders_count", columnDefinition = "integer default 0")
     private int ordersCount;
 
-    @Column(columnDefinition = "double default 0")
-    private double rate;
+    @Column(columnDefinition = "integer default 0")
+    private int ratingsSum;
 
     @Column(columnDefinition = "integer default 0")
     private int ratingsCount;
+
+    public double getRating() {
+        if (ratingsCount == 0) {
+            return 0;
+        }
+        return (double) ratingsSum / ratingsCount;
+    }
 }

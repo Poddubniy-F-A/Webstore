@@ -4,14 +4,13 @@ import com.webstore.entities.Feedback;
 import com.webstore.entities.Good;
 import com.webstore.entities.Order;
 import com.webstore.entities.User;
-import com.webstore.exceptions.DuplicateFeedbackException;
-import com.webstore.exceptions.FeedbackNotFoundException;
+import com.webstore.exceptions.feedbacks.FeedbackNotFoundException;
 import com.webstore.exceptions.GoodNotFoundException;
-import com.webstore.exceptions.NoFeedbacksException;
+import com.webstore.exceptions.feedbacks.IllegalRatingTryException;
 import com.webstore.repositories.FeedbacksRepository;
 import com.webstore.repositories.GoodsRepository;
 import com.webstore.repositories.OrdersRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,17 +20,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class FeedbacksService {
-    private FeedbacksRepository feedbacksRepository;
-    private OrdersRepository ordersRepository;
-    private GoodsRepository goodsRepository;
 
-    public List<Feedback> getFeedbacksAbout(Long goodId) throws GoodNotFoundException {
-        return feedbacksRepository.findByGood(getGoodById(goodId));
-    }
+    private final FeedbacksRepository feedbacksRepository;
+    private final OrdersRepository ordersRepository;
+    private final GoodsRepository goodsRepository;
 
-    public HashMap<Good, Feedback> getGoodsWithFeedbacksBy(User user) throws DuplicateFeedbackException {
+    public HashMap<Good, Feedback> getGoodsWithFeedbacksBy(User user) {
         HashMap<Good, Feedback> result = new HashMap<>();
         for (Good good : ordersRepository.findByUser(user).stream().map(Order::getGood).collect(Collectors.toSet())) {
             try {
@@ -45,53 +41,53 @@ public class FeedbacksService {
 
     @Transactional
     public void handleFeedbackCreating(
-            User user, Long goodId, String text, int rate
-    ) throws GoodNotFoundException, NoFeedbacksException {
+            User user,
+            Long goodId,
+            String text,
+            int rating
+    ) throws GoodNotFoundException, IllegalRatingTryException {
         Good good = getGoodById(goodId);
+        if (ordersRepository.findByUser(user).stream().noneMatch(order -> order.getGood().equals(good))) {
+            throw new IllegalRatingTryException();
+        }
 
         Feedback feedback = new Feedback();
         feedback.setUser(user);
         feedback.setGood(good);
         feedback.setText(text);
-        feedback.setRate(rate);
+        feedback.setRating(rating);
         feedbacksRepository.save(feedback);
 
-        updateRating(good);
+        updateRating(good, rating);
     }
 
     @Transactional
     public void handleFeedbackEditing(
-            User user, Long goodId, String text, int rate
-    ) throws GoodNotFoundException, FeedbackNotFoundException, DuplicateFeedbackException, NoFeedbacksException {
+            User user,
+            Long goodId,
+            String text,
+            int rating
+    ) throws GoodNotFoundException, FeedbackNotFoundException {
         Good good = getGoodById(goodId);
 
         Feedback feedback = getFeedbackAboutBy(good, user);
         feedback.setText(text);
-        feedback.setRate(rate);
+        feedback.setRating(rating);
         feedbacksRepository.save(feedback);
 
-        updateRating(good);
+        updateRating(good, rating);
     }
 
-    private void updateRating(Good good) throws NoFeedbacksException {
-        List<Feedback> feedbacks = feedbacksRepository.findByGood(good);
-        if (feedbacks.isEmpty()) {
-            throw new NoFeedbacksException("Не найдено отзывов про " + good);
-        }
-        good.setRatingsCount(feedbacks.size());
-        good.setRate(feedbacks.stream().mapToInt(Feedback::getRate).average().orElse(0));
+    private void updateRating(Good good, int rating) {
+        good.setRatingsCount(good.getRatingsCount() + 1);
+        good.setRatingsSum(good.getRatingsSum() + rating);
         goodsRepository.save(good);
     }
 
-    public Feedback getFeedbackAboutBy(
-            Good good, User user
-    ) throws FeedbackNotFoundException, DuplicateFeedbackException {
+    public Feedback getFeedbackAboutBy(Good good, User user) throws FeedbackNotFoundException {
         List<Feedback> response = feedbacksRepository.findByGoodAndUser(good, user);
         if (response.isEmpty()) {
             throw new FeedbackNotFoundException();
-        }
-        if (response.size() > 1) {
-            throw new DuplicateFeedbackException(user + " сделал более одного отзыва на " + good);
         }
         return response.getFirst();
     }

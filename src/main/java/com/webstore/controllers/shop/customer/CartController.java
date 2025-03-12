@@ -1,11 +1,8 @@
 package com.webstore.controllers.shop.customer;
 
-import com.paypal.base.rest.PayPalRESTException;
-import com.webstore.exceptions.DisapprovedPaymentException;
-import com.webstore.utils.Cart;
 import com.webstore.exceptions.GoodNotFoundException;
-import com.webstore.exceptions.LockedCartException;
-import com.webstore.exceptions.IllegalGoodsCountException;
+import com.webstore.exceptions.cart.LockedCartException;
+import com.webstore.exceptions.cart.payment.PaymentException;
 import com.webstore.services.shop.customer.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,13 +17,6 @@ import static com.webstore.security.MyUserDetailsService.userFromContext;
 @RequiredArgsConstructor
 public class CartController {
 
-    private final static String ERROR_PARAM_NAME = "error",
-            LOCKED_CART_ERROR_CODE = "cart_locked",
-            GOOD_COUNT_ERROR_CODE = "good_count",
-            PAYPAL_ERROR_CODE = "paypal",
-            CANCELED_PAYMENT_ERROR_CODE = "canceled_payment",
-            DISAPPROVED_PAYMENT_ERROR_CODE = "payment";
-
     @Value("${app.endpoints.cart.main}")
     String rootUrl;
     @Value("${app.endpoints.catalog.main}")
@@ -37,120 +27,68 @@ public class CartController {
 
     @Value("${app.endpoints.cart.canceled_payment}")
     String canceledPaymentUrl;
-    @Value("${app.endpoints.cart.successful_payment}")
-    String successfulPaymentUrl;
+    @Value("${app.endpoints.cart.finished_payment}")
+    String finishedPaymentUrl;
 
     private final CartService service;
 
-    private final Cart cart;
-
     @GetMapping(value = "${app.endpoints.cart.main}")
-    public String cartPage(Model model, @RequestParam(value = ERROR_PARAM_NAME, required = false) String error) {
-        if (error != null) {
-            switch (error) {
-                case LOCKED_CART_ERROR_CODE -> model.addAttribute(
-                        "errorMessage",
-                        "Дождитесь ожидания оплаты"
-                );
-                case GOOD_COUNT_ERROR_CODE -> model.addAttribute(
-                        "errorMessage",
-                        "Товаров нет в нужном количестве"
-                );
-                case PAYPAL_ERROR_CODE -> model.addAttribute(
-                        "errorMessage",
-                        "Ошибка при обработке оплаты (PayPal)."
-                );
-                case DISAPPROVED_PAYMENT_ERROR_CODE -> model.addAttribute(
-                        "errorMessage",
-                        "Ошибка при оплате"
-                );
-                case CANCELED_PAYMENT_ERROR_CODE -> model.addAttribute(
-                        "errorMessage",
-                        "Оплата отменена."
-                );
-            }
-        }
-        model.addAttribute("cart", cart.getCart());
-        return "shop/customer/cart";
+    public String cartPage(Model model) {
+        return filledCartPage(model);
     }
 
     @PostMapping(value = "${app.endpoints.cart.main}")
-    public String addGoodToCart(@RequestParam Long id) throws GoodNotFoundException {
-        try {
-            cart.addGoodToCart(service.getGoodById(id));
-            return "redirect:" + catalogUrl;
-        } catch (LockedCartException e) {
-            return "redirect:" + rootUrl + errorParam(LOCKED_CART_ERROR_CODE);
-        }
+    public RedirectView addGoodToCart(@RequestParam Long id) throws GoodNotFoundException, LockedCartException { //
+        service.addGoodToCart(id);
+        return new RedirectView(catalogUrl);
     }
 
     @PutMapping(value = "${app.endpoints.cart.main}")
-    public String editGoodCountInCart(@RequestParam Long id, @RequestParam int quantity) throws GoodNotFoundException {
-        try {
-            cart.setGoodCountInCart(service.getGoodById(id), quantity);
-            return "redirect:" + rootUrl;
-        } catch (LockedCartException e) {
-            return "redirect:" + rootUrl + errorParam(LOCKED_CART_ERROR_CODE);
-        }
+    public RedirectView editGoodCountInCart(
+            @RequestParam Long id,
+            @RequestParam int quantity
+    ) throws GoodNotFoundException, LockedCartException { //
+        service.setGoodCountInCart(id, quantity);
+        return new RedirectView(rootUrl);
     }
 
     @DeleteMapping(value = "${app.endpoints.cart.main}")
-    public String deleteGoodFromCart(@RequestParam Long id) throws GoodNotFoundException {
-        try {
-            cart.removeFromCart(service.getGoodById(id));
-            return "redirect:" + rootUrl;
-        } catch (LockedCartException e) {
-            return "redirect:" + rootUrl + errorParam(LOCKED_CART_ERROR_CODE);
-        }
+    public RedirectView deleteGoodFromCart(@RequestParam Long id) throws GoodNotFoundException, LockedCartException { //
+        service.removeFromCart(id);
+        return new RedirectView(rootUrl);
     }
 
     @PostMapping(value = "${app.endpoints.cart.validating}")
-    public RedirectView checkout() {
-        try {
-            String approvalUrl = service.getPaymentUrl(
-                    cart.getCart(),
-                    hostUrl + canceledPaymentUrl,
-                    hostUrl + successfulPaymentUrl
-            );
-            cart.lock();
-            return new RedirectView(approvalUrl);
-        } catch (IllegalGoodsCountException e) {
-            return new RedirectView(hostUrl + rootUrl + errorParam(GOOD_COUNT_ERROR_CODE));
-        } catch (PayPalRESTException e) {
-            return new RedirectView(hostUrl + rootUrl + errorParam(PAYPAL_ERROR_CODE));
-        } catch (DisapprovedPaymentException e) {
-            return new RedirectView(hostUrl + rootUrl + errorParam(DISAPPROVED_PAYMENT_ERROR_CODE));
-        }
+    public RedirectView checkout() throws PaymentException {
+        service.lockCart();
+        return new RedirectView(service.getPaymentUrl(
+                hostUrl + canceledPaymentUrl,
+                hostUrl + finishedPaymentUrl
+        ));
     }
 
-    @GetMapping(value = "${app.endpoints.cart.successful_payment}")
+    @GetMapping(value = "${app.endpoints.cart.finished_payment}")
     public String successfulPayment(
-            @RequestParam("paymentId") String paymentId, @RequestParam("PayerID") String payerId
-    ) throws LockedCartException { // не должно быть
-        try {
-            service.handleBuy(cart.getCart(), userFromContext(), paymentId, payerId);
-            cart.unlock();
-            cart.cleanCart();
-            return "redirect:" + rootUrl;
-        } catch (IllegalGoodsCountException e) {
-            cart.unlock();
-            return "redirect:" + rootUrl + errorParam(GOOD_COUNT_ERROR_CODE);
-        } catch (PayPalRESTException e) {
-            cart.unlock();
-            return "redirect:" + rootUrl + errorParam(PAYPAL_ERROR_CODE);
-        } catch (DisapprovedPaymentException e) {
-            cart.unlock();
-            return "redirect:" + rootUrl + errorParam(DISAPPROVED_PAYMENT_ERROR_CODE);
-        }
+            Model model,
+            @RequestParam("paymentId") String paymentId,
+            @RequestParam("PayerID") String payerId
+    ) throws PaymentException {
+        service.handleBuy(userFromContext(), paymentId, payerId);
+        service.refreshCart();
+
+        return filledCartPage(model);
     }
 
     @GetMapping(value = "${app.endpoints.cart.canceled_payment}")
-    public String canceledPayment() {
-        cart.unlock();
-        return "redirect:" + rootUrl + errorParam(CANCELED_PAYMENT_ERROR_CODE);
+    public String canceledPayment(Model model) {
+        service.unlockCart();
+
+        model.addAttribute("errorMessage", "Оплата отменена");
+        return filledCartPage(model);
     }
 
-    private static String errorParam(String errorCode) {
-        return "?" + ERROR_PARAM_NAME + "=" + errorCode;
+    private String filledCartPage(Model model) {
+        model.addAttribute("cart", service.getCart());
+        return "shop/customer/cart";
     }
 }

@@ -1,4 +1,4 @@
-package com.webstore.exceptions;
+package com.webstore.exceptions.feedbacks;
 
 public class FeedbackNotFoundException extends Exception{
 }

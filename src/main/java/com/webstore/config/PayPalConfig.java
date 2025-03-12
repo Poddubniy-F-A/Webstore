@@ -9,6 +9,7 @@ import java.util.Map;
 import static java.util.Collections.singletonMap;
 
 public class PayPalConfig {
+
     private static final String MODE = "sandbox",
             CLIENT_ID = "AaooF-25wxpbuWme3LOgP5PdebnKczOYBa7qhuZ39KFhM0P-mlU4LD2a36dYxMALDiF32ilA0lcnRRNv",
             CLIENT_SECRET = "EJTX4Pb8jtaDu1fci-4gxPgmWxmNGqlRket_TQUMtI54GCEFqAy3KE9e5G5yQoaLRhpyoTrDdZwCh2bP";

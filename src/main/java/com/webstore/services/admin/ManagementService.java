@@ -1,19 +1,19 @@
-package com.webstore.services.shop;
+package com.webstore.services.admin;
 
 import com.webstore.entities.Good;
 import com.webstore.exceptions.GoodNotFoundException;
-import com.webstore.exceptions.IllegalGoodsCountException;
 import com.webstore.repositories.GoodsRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
-public class GoodsService {
-    private GoodsRepository goodsRepository;
+@RequiredArgsConstructor
+public class ManagementService {
+
+    private final GoodsRepository goodsRepository;
 
     public List<Good> getAllGoods() {
         return goodsRepository.findAll();
@@ -53,16 +53,6 @@ public class GoodsService {
         good.setBrand(brand);
         good.setCategory(category);
         good.setPrice(price);
-        goodsRepository.save(good);
-    }
-
-    public void handleDelivery(Long goodId, int count) throws GoodNotFoundException, IllegalGoodsCountException {
-        if (count <= 0) {
-            throw new IllegalGoodsCountException();
-        }
-
-        Good good = getGoodById(goodId);
-        good.setCount(good.getCount() + count);
         goodsRepository.save(good);
     }
 

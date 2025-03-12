@@ -1,11 +1,10 @@
 package com.webstore.controllers.admin;
 
-import com.webstore.exceptions.GoodNotFoundException;
-import com.webstore.exceptions.IllegalGoodsCountException;
-import com.webstore.services.shop.GoodsService;
+import com.webstore.exceptions.warehouse.IllegalGoodIdException;
+import com.webstore.exceptions.warehouse.IllegalGoodQuantityException;
+import com.webstore.services.admin.WarehouseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequiredArgsConstructor
 public class WarehouseController {
 
-    private final GoodsService service;
+    private final WarehouseService service;
 
     @GetMapping(value = "${app.endpoints.warehouse.main}")
     public String warehousePage() {
@@ -22,20 +21,11 @@ public class WarehouseController {
     }
 
     @PostMapping(value = "${app.endpoints.warehouse.main}")
-    public String deliveryHandling(Model model, @RequestParam Long id, @RequestParam int count) {
-        try {
-            service.handleDelivery(id, count);
-        } catch (IllegalGoodsCountException e) {
-            model.addAttribute(
-                    "errorMessage",
-                    "Нельзя поставить такое количество товара"
-            );
-        } catch (GoodNotFoundException e) {
-            model.addAttribute(
-                    "errorMessage",
-                    "Товара с таким id ещё не зарегистрировано - обратитесь к модераторам"
-            );
-        }
+    public String deliveryHandling(
+            @RequestParam Long id,
+            @RequestParam int count
+    ) throws IllegalGoodQuantityException, IllegalGoodIdException {
+        service.handleDelivery(id, count);
         return "admin/warehouse/delivery-form";
     }
 }

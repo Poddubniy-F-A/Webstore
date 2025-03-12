@@ -10,6 +10,7 @@ import java.util.Collection;
 
 @AllArgsConstructor
 public class MyUserDetails implements UserDetails {
+
     @Getter
     private User user;
     private Collection<? extends GrantedAuthority> authorities;

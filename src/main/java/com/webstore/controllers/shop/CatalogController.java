@@ -2,8 +2,7 @@ package com.webstore.controllers.shop;
 
 import com.webstore.entities.Good;
 import com.webstore.exceptions.GoodNotFoundException;
-import com.webstore.services.shop.GoodsService;
-import com.webstore.services.shop.customer.FeedbacksService;
+import com.webstore.services.shop.CatalogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,8 +17,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CatalogController {
 
-    private final GoodsService goodsService;
-    private final FeedbacksService feedbacksService;
+    private final CatalogService service;
 
     @GetMapping(value = "${app.endpoints.catalog.main}")
     public String catalogPage(
@@ -31,34 +29,33 @@ public class CatalogController {
             @RequestParam(required = false) Integer minRating,
             @RequestParam(required = false) Boolean inStock
     ) {
-        List<Good> allGoods = goodsService.getAllGoods().stream()
-                .filter((good) ->
+        List<Good> allGoods = service.getAllGoods().stream()
+                .filter(good ->
                         (brand == null || brand.equals("all") || good.getBrand().equals(brand)) &&
                                 (category == null || category.equals("all") || good.getCategory().equals(category)) &&
                                 (maxPrice == null || good.getPrice() <= maxPrice) &&
-                                (minRating == null || good.getRate() >= minRating) &&
+                                (minRating == null || good.getRating() >= minRating) &&
                                 (inStock == null || good.getCount() > 0))
                 .sorted((o1, o2) -> {
-                    if (sort == null) {
-                        return o2.getOrdersCount() - o1.getOrdersCount();
-                    }
-
-                    switch (sort) {
-                        case ("priceAsc") -> {
-                            return o1.getPrice() - o2.getPrice();
-                        }
-                        case ("rateDesc") -> {
-                            return (int) (1000 * (o2.getRate() - o1.getRate()));
-                        }
-                        default -> {
-                            return o2.getOrdersCount() - o1.getOrdersCount();
+                    if (sort != null) {
+                        switch (sort) {
+                            case ("priceAsc") -> {
+                                return Integer.compare(o1.getPrice(), o2.getPrice());
+                            }
+                            case ("rateDesc") -> {
+                                return Double.compare(o2.getRating(), o1.getRating());
+                            }
                         }
                     }
+                    return Integer.compare(o2.getOrdersCount(), o1.getOrdersCount());
                 }).collect(Collectors.toList());
 
         model.addAttribute("goods", allGoods);
         model.addAttribute("brands", allGoods.stream().map(Good::getBrand).collect(Collectors.toSet()));
-        model.addAttribute("categories", allGoods.stream().map(Good::getCategory).collect(Collectors.toSet()));
+        model.addAttribute(
+                "categories",
+                allGoods.stream().map(Good::getCategory).collect(Collectors.toSet())
+        );
 
         model.addAttribute("defaultSort", sort == null ? "ordersCount" : sort);
 
@@ -76,10 +73,10 @@ public class CatalogController {
 
     @GetMapping(value = "${app.endpoints.catalog.main}/{id}")
     public String goodPage(Model model, @PathVariable Long id) throws GoodNotFoundException {
-        //transaction
-        Good good = goodsService.getGoodById(id);
+        //atomically
+        Good good = service.getGoodById(id);
         model.addAttribute("good", good);
-        model.addAttribute("feedbacks", feedbacksService.getFeedbacksAbout(id));
+        model.addAttribute("feedbacks", service.getFeedbacksAbout(id));
         //
 
         return "shop/catalog/good-page";

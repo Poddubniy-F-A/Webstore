@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @Table(name = "users")
 public class User {
+
     public enum Status {
         cust,
         mod,

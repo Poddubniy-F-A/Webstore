@@ -10,6 +10,7 @@ import java.util.List;
 
 @Repository
 public interface FeedbacksRepository extends JpaRepository<Feedback, Long> {
+
     List<Feedback> findByGood(Good good);
 
     List<Feedback> findByGoodAndUser(Good good, User user);
