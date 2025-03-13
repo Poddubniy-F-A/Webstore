@@ -1,17 +1,36 @@
 package com.webstore.config;
 
+import com.webstore.model.Role;
+import com.webstore.security.MyUserDetails;
 import com.webstore.utils.EndpointsURLs;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.DefaultRedirectStrategy;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+
+import static com.webstore.model.Role.*;
 
 @Configuration
 @EnableWebSecurity
@@ -29,98 +48,96 @@ public class SecurityConfig {
     }
 
     @Configuration
-    @Order(1)
-    @RequiredArgsConstructor
-    public static class ShopConfigurationAdapter {
+    public static class MyConfigurationAdapter {
 
         private final EndpointsURLs endpointsURLs;
+        private final Map<Role, String> rolesDefaultUrls;
+        private final Map<Role, HashSet<String>> rolesResourcesRootsUrls;
+
+        public MyConfigurationAdapter(EndpointsURLs endpointsURLs) {
+            this.endpointsURLs = endpointsURLs;
+            rolesDefaultUrls = Map.of(
+                    CUST, endpointsURLs.CATALOG_MAIN,
+                    MOD, endpointsURLs.MANAGEMENT_MAIN,
+                    WW, endpointsURLs.WAREHOUSE_MAIN
+            );
+            rolesResourcesRootsUrls = Map.of(
+                    CUST, new HashSet<>(Arrays.asList(endpointsURLs.CART_MAIN, endpointsURLs.FEEDBACKS_MAIN)),
+                    MOD, new HashSet<>(Collections.singletonList(endpointsURLs.MANAGEMENT_MAIN)),
+                    WW, new HashSet<>(Collections.singletonList(endpointsURLs.WAREHOUSE_MAIN))
+            );
+        }
 
         @Bean
-        SecurityFilterChain shopFilterChain(HttpSecurity http) throws Exception {
+        SecurityFilterChain myFilterChain(HttpSecurity http) throws Exception {
             http
-                    .securityMatcher(
-                            endpointsURLs.AUTH_CUSTOMER_MAIN + "/**",
-                            endpointsURLs.CATALOG_MAIN + "/**",
-                            endpointsURLs.CART_MAIN + "/**",
-                            endpointsURLs.FEEDBACKS_MAIN + "/**",
-                            endpointsURLs.AUTH_LOGOUT
-                    )
                     .authorizeHttpRequests(authorize -> authorize
                             .requestMatchers(
                                     endpointsURLs.CART_MAIN + "/**",
                                     endpointsURLs.FEEDBACKS_MAIN + "/**"
-                            ).hasRole("CUSTOMER")
+                            ).hasRole(CUST.toString())
+                            .requestMatchers(endpointsURLs.MANAGEMENT_MAIN + "/**").hasRole(MOD.toString())
+                            .requestMatchers(endpointsURLs.WAREHOUSE_MAIN + "/**").hasRole(WW.toString())
                             .anyRequest().permitAll())
                     .formLogin(login -> login
-                            .loginPage(endpointsURLs.AUTH_CUSTOMER_MAIN)
+                            .loginPage(endpointsURLs.AUTH_MAIN)
                             .permitAll()
-                            .loginProcessingUrl(endpointsURLs.AUTH_CUSTOMER_LOGIN)
-                            .defaultSuccessUrl(endpointsURLs.CATALOG_MAIN)
-                            .failureUrl(endpointsURLs.AUTH_CUSTOMER_FAILURE))
+                            .loginProcessingUrl(endpointsURLs.AUTH_LOGIN)
+                            .successHandler(new AuthenticationSuccessHandler() {
+                                final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+                                final RequestCache requestCache = new HttpSessionRequestCache();
+
+                                @Override
+                                public void onAuthenticationSuccess(
+                                        HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        Authentication authentication
+                                ) throws IOException {
+                                    SavedRequest savedRequest = requestCache.getRequest(request, response);
+                                    if (savedRequest != null) {
+                                        String targetUrl = savedRequest.getRedirectUrl();
+                                        if (rolesResourcesRootsUrls.values().stream().anyMatch(
+                                                urls -> urls.stream().anyMatch(
+                                                        url -> targetUrl.startsWith(endpointsURLs.HOST + url)
+                                                )
+                                        )) {
+                                            clearAuthenticationAttributes(request);
+                                            redirectStrategy.sendRedirect(request, response, targetUrl);
+                                        } else {
+                                            requestCache.removeRequest(request, response);
+                                            sendDefaultRedirect(request, response, authentication);
+                                            clearAuthenticationAttributes(request);
+                                        }
+                                    } else {
+                                        sendDefaultRedirect(request, response, authentication);
+                                        clearAuthenticationAttributes(request);
+                                    }
+                                }
+
+                                private void clearAuthenticationAttributes(HttpServletRequest request) {
+                                    HttpSession session = request.getSession(false);
+                                    if (session != null) {
+                                        session.removeAttribute("SPRING_SECURITY_LAST_EXCEPTION");
+                                    }
+                                }
+
+                                private void sendDefaultRedirect(
+                                        HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        Authentication authentication
+                                ) throws IOException {
+                                    if (!response.isCommitted()) {
+                                        redirectStrategy.sendRedirect(request, response, rolesDefaultUrls.get(
+                                                ((MyUserDetails) authentication.getPrincipal()).getUser().getRole()
+                                        ));
+                                    }
+                                }
+                            })
+                            .failureUrl(endpointsURLs.AUTH_FAILURE))
                     .logout(logout -> logout
                             .logoutSuccessUrl(endpointsURLs.MAIN))
                     .exceptionHandling(handling -> handling
-                            .accessDeniedPage(endpointsURLs.ERRORS_ACCESS_DENIED_CUST_SERVICE))
-                    .csrf(AbstractHttpConfigurer::disable);
-            return http.build();
-        }
-    }
-
-    @Configuration
-    @Order(2)
-    @RequiredArgsConstructor
-    public static class ModeratorConfigurationAdapter {
-
-        private final EndpointsURLs endpointsURLs;
-
-        @Bean
-        SecurityFilterChain moderatorFilterChain(HttpSecurity http) throws Exception {
-            http
-                    .securityMatcher(
-                            endpointsURLs.AUTH_MODERATOR_MAIN + "/**",
-                            endpointsURLs.MANAGEMENT_MAIN + "/**"
-                    )
-                    .authorizeHttpRequests(authorize -> authorize
-                            .requestMatchers(endpointsURLs.MANAGEMENT_MAIN + "/**").hasRole("MODERATOR")
-                            .anyRequest().permitAll())
-                    .formLogin(login -> login
-                            .loginPage(endpointsURLs.AUTH_MODERATOR_MAIN)
-                            .permitAll()
-                            .loginProcessingUrl(endpointsURLs.AUTH_MODERATOR_LOGIN)
-                            .defaultSuccessUrl(endpointsURLs.MANAGEMENT_MAIN)
-                            .failureUrl(endpointsURLs.AUTH_MODERATOR_FAILURE))
-                    .exceptionHandling(handling -> handling
-                            .accessDeniedPage(endpointsURLs.ERRORS_ACCESS_DENIED_MANAGEMENT))
-                    .csrf(AbstractHttpConfigurer::disable);
-            return http.build();
-        }
-    }
-
-    @Configuration
-    @Order(3)
-    @RequiredArgsConstructor
-    public static class WWConfigurationAdapter {
-
-        private final EndpointsURLs endpointsURLs;
-
-        @Bean
-        SecurityFilterChain wwFilterChain(HttpSecurity http) throws Exception {
-            http
-                    .securityMatcher(
-                            endpointsURLs.AUTH_WH_WORKER_MAIN + "/**",
-                            endpointsURLs.WAREHOUSE_MAIN + "/**"
-                    )
-                    .authorizeHttpRequests(authorize -> authorize
-                            .requestMatchers(endpointsURLs.WAREHOUSE_MAIN + "/**").hasRole("WH_WORKER")
-                            .anyRequest().permitAll())
-                    .formLogin(login -> login
-                            .loginPage(endpointsURLs.AUTH_WH_WORKER_MAIN)
-                            .permitAll()
-                            .loginProcessingUrl(endpointsURLs.AUTH_WH_WORKER_LOGIN)
-                            .defaultSuccessUrl(endpointsURLs.WAREHOUSE_MAIN)
-                            .failureUrl(endpointsURLs.AUTH_WH_WORKER_FAILURE))
-                    .exceptionHandling(handling -> handling
-                            .accessDeniedPage(endpointsURLs.ERRORS_ACCESS_DENIED_WAREHOUSE))
+                            .accessDeniedPage(endpointsURLs.ACCESS_DENIED))
                     .csrf(AbstractHttpConfigurer::disable);
             return http.build();
         }

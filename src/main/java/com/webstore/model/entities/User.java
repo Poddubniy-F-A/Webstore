@@ -1,5 +1,6 @@
-package com.webstore.entities;
+package com.webstore.model.entities;
 
+import com.webstore.model.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,12 +10,6 @@ import lombok.Setter;
 @Setter
 @Table(name = "users")
 public class User {
-
-    public enum Status {
-        cust,
-        mod,
-        ww
-    }
 
     @Id
     private String login;
@@ -27,5 +22,5 @@ public class User {
 
     @Column
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private Role role;
 }

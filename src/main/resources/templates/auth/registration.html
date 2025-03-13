@@ -9,7 +9,7 @@
 <div class="login-container">
     <h2 style="text-align: center;">Регистрация</h2>
     <div th:unless="${#strings.isEmpty(errorMessage)}" class="error-message" th:text="${errorMessage}"></div>
-    <form th:action="${@environment.getProperty('app.endpoints.auth.customer.registration')}" method="post">
+    <form th:action="${@environment.getProperty('app.endpoints.auth.registration')}" method="post">
         <div>
             <label for="login">Логин:</label>
             <input type="text" id="login" name="login" required>

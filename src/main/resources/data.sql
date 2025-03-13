@@ -1,10 +1,10 @@
-INSERT INTO users (login, password, nick, status) VALUES
-('user1', 'pass1', 'alexa', 'cust'),
-('user2', 'pass2', 'bobik', 'cust'),
-('user3', 'pass3', 'carlan', 'cust'),
-('Alex111', '123', 'Alexander', 'mod'),
-('Bob222', '345', 'Robert', 'ww'),
-('Carl333', '123', 'Carl', 'mod');
+INSERT INTO users (login, password, nick, role) VALUES
+('user1', 'pass1', 'alexa', 'CUST'),
+('user2', 'pass2', 'bobik', 'CUST'),
+('user3', 'pass3', 'carlan', 'CUST'),
+('Alex111', '123', 'Alexander', 'MOD'),
+('Bob222', '345', 'Robert', 'WW'),
+('Carl333', '123', 'Carl', 'MOD');
 
 INSERT INTO goods (label, description, picture_path, category, brand, price, count) VALUES
 ('Good1', 'desc1', 'https://drive.google.com/thumbnail?id=1AbAdy5HysX1TcSnJ9fQlXE7tCqVr-o8M', 'cat1', 'brand1', 100, 1),

@@ -1,6 +1,6 @@
 package com.webstore.security;
 
-import com.webstore.entities.User;
+import com.webstore.model.entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;

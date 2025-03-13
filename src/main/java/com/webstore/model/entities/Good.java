@@ -1,4 +1,4 @@
-package com.webstore.entities;
+package com.webstore.model.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;

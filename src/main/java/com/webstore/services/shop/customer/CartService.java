@@ -2,9 +2,9 @@ package com.webstore.services.shop.customer;
 
 import com.paypal.api.payments.*;
 import com.paypal.base.rest.PayPalRESTException;
-import com.webstore.entities.Good;
-import com.webstore.entities.Order;
-import com.webstore.entities.User;
+import com.webstore.model.entities.Good;
+import com.webstore.model.entities.Order;
+import com.webstore.model.entities.User;
 import com.webstore.exceptions.GoodNotFoundException;
 import com.webstore.exceptions.cart.LockedCartException;
 import com.webstore.exceptions.cart.payment.*;

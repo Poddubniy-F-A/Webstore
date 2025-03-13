@@ -24,19 +24,10 @@ app:
     main: /index
 
     auth:
-      moderator:
-        main: /mod_auth
-        login: /mod_auth/process_login
-        failure: /mod_auth/fail
-      wh_worker:
-        main: /ww_auth
-        login: /ww_auth/process_login
-        failure: /ww_auth/fail
-      customer:
-        main: /cust_auth
-        login: /cust_auth/process_login
-        failure: /cust_auth/fail
-        registration: /cust_auth/register
+      main: /auth
+      login: /auth/process_login
+      failure: /auth/fail
+      registration: /register
       logout: /logout
 
     management:
@@ -61,8 +52,4 @@ app:
       creating: /feedbacks/create
       editing: /feedbacks/edit
 
-    errors:
-      access_denied:
-        cust_service: /cust_access_denied
-        management: /man_access_denied
-        warehouse: /wh_access_denied
+    access_denied: /access_denied

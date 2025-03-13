@@ -1,4 +1,4 @@
-package com.webstore.entities;
+package com.webstore.model.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,8 +7,8 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "feedbacks")
-public class Feedback {
+@Table(name = "orders")
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,8 +23,5 @@ public class Feedback {
     private Good good;
 
     @Column
-    private String text;
-
-    @Column
-    private int rating;
+    private int count;
 }

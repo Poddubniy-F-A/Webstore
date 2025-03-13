@@ -12,29 +12,14 @@ public class EndpointsURLs {
     @Value("${app.endpoints.main}")
     public String MAIN;
 
-    @Value("${app.endpoints.auth.moderator.main}")
-    public String AUTH_MODERATOR_MAIN;
-    @Value("${app.endpoints.auth.moderator.login}")
-    public String AUTH_MODERATOR_LOGIN;
-    @Value("${app.endpoints.auth.moderator.failure}")
-    public String AUTH_MODERATOR_FAILURE;
-
-    @Value("${app.endpoints.auth.wh_worker.main}")
-    public String AUTH_WH_WORKER_MAIN;
-    @Value("${app.endpoints.auth.wh_worker.login}")
-    public String AUTH_WH_WORKER_LOGIN;
-    @Value("${app.endpoints.auth.wh_worker.failure}")
-    public String AUTH_WH_WORKER_FAILURE;
-
-    @Value("${app.endpoints.auth.customer.main}")
-    public String AUTH_CUSTOMER_MAIN;
-    @Value("${app.endpoints.auth.customer.login}")
-    public String AUTH_CUSTOMER_LOGIN;
-    @Value("${app.endpoints.auth.customer.failure}")
-    public String AUTH_CUSTOMER_FAILURE;
-    @Value("${app.endpoints.auth.customer.registration}")
-    public String AUTH_CUSTOMER_REGISTRATION;
-
+    @Value("${app.endpoints.auth.main}")
+    public String AUTH_MAIN;
+    @Value("${app.endpoints.auth.login}")
+    public String AUTH_LOGIN;
+    @Value("${app.endpoints.auth.failure}")
+    public String AUTH_FAILURE;
+    @Value("${app.endpoints.auth.registration}")
+    public String AUTH_REGISTRATION;
     @Value("${app.endpoints.auth.logout}")
     public String AUTH_LOGOUT;
 
@@ -67,10 +52,6 @@ public class EndpointsURLs {
     @Value("${app.endpoints.feedbacks.editing}")
     public String FEEDBACKS_EDITING;
 
-    @Value("${app.endpoints.errors.access_denied.cust_service}")
-    public String ERRORS_ACCESS_DENIED_CUST_SERVICE;
-    @Value("${app.endpoints.errors.access_denied.management}")
-    public String ERRORS_ACCESS_DENIED_MANAGEMENT;
-    @Value("${app.endpoints.errors.access_denied.warehouse}")
-    public String ERRORS_ACCESS_DENIED_WAREHOUSE;
+    @Value("${app.endpoints.access_denied}")
+    public String ACCESS_DENIED;
 }

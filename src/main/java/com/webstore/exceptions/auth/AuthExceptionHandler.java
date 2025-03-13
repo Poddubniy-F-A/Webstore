@@ -18,6 +18,6 @@ public class AuthExceptionHandler {
     @ExceptionHandler(NotUniqueLoginException.class)
     public RedirectView handleNotUniqueLogin(RedirectAttributes redirectAttributes) {
         redirectAttributes.addFlashAttribute(REG_ERROR_MESSAGE_ATTRIBUTE_NAME, "Логин уже занят");
-        return new RedirectView(endpointsURLs.AUTH_CUSTOMER_REGISTRATION);
+        return new RedirectView(endpointsURLs.AUTH_REGISTRATION);
     }
 }

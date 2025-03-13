@@ -1,6 +1,6 @@
 package com.webstore.utils;
 
-import com.webstore.entities.Good;
+import com.webstore.model.entities.Good;
 import com.webstore.exceptions.cart.LockedCartException;
 import lombok.Getter;
 import org.springframework.stereotype.Component;

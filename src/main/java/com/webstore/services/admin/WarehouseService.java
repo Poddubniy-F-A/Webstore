@@ -1,6 +1,6 @@
 package com.webstore.services.admin;
 
-import com.webstore.entities.Good;
+import com.webstore.model.entities.Good;
 import com.webstore.exceptions.warehouse.IllegalGoodIdException;
 import com.webstore.exceptions.warehouse.IllegalGoodQuantityException;
 import com.webstore.repositories.GoodsRepository;

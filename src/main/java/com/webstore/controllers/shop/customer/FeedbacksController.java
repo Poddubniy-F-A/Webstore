@@ -1,6 +1,6 @@
 package com.webstore.controllers.shop.customer;
 
-import com.webstore.entities.Good;
+import com.webstore.model.entities.Good;
 import com.webstore.exceptions.feedbacks.FeedbackNotFoundException;
 import com.webstore.exceptions.GoodNotFoundException;
 import com.webstore.exceptions.feedbacks.IllegalRatingTryException;

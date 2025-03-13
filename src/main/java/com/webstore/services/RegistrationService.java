@@ -1,6 +1,7 @@
 package com.webstore.services;
 
-import com.webstore.entities.User;
+import com.webstore.model.Role;
+import com.webstore.model.entities.User;
 import com.webstore.exceptions.auth.NotUniqueLoginException;
 import com.webstore.repositories.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class RegistrationService {
         user.setLogin(login);
         user.setPassword(password);
         user.setNick(nick);
-        user.setStatus(User.Status.cust);
+        user.setRole(Role.CUST);
         repository.save(user);
     }
 }

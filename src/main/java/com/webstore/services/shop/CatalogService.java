@@ -1,7 +1,7 @@
 package com.webstore.services.shop;
 
-import com.webstore.entities.Feedback;
-import com.webstore.entities.Good;
+import com.webstore.model.entities.Feedback;
+import com.webstore.model.entities.Good;
 import com.webstore.exceptions.GoodNotFoundException;
 import com.webstore.repositories.FeedbacksRepository;
 import com.webstore.repositories.GoodsRepository;

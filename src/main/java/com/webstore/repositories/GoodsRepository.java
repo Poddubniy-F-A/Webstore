@@ -1,6 +1,6 @@
 package com.webstore.repositories;
 
-import com.webstore.entities.Good;
+import com.webstore.model.entities.Good;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

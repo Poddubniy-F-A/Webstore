@@ -23,66 +23,37 @@ public class AuthController {
     private final EndpointsURLs endpointsURLs;
     private final RegistrationService service;
 
-    @GetMapping(value = "${app.endpoints.auth.customer.registration}")
+    @GetMapping(value = "${app.endpoints.auth.registration}")
     public String regPage(@ModelAttribute(REG_ERROR_MESSAGE_ATTRIBUTE_NAME) String errorMessage) {
         return "auth/registration";
     }
 
-    @PostMapping(value = "${app.endpoints.auth.customer.registration}")
+    @PostMapping(value = "${app.endpoints.auth.registration}")
     public RedirectView regTry(
             @RequestParam String login,
             @RequestParam String password,
             @RequestParam String nick
     ) throws NotUniqueLoginException {
         service.register(login, password, nick);
-        return new RedirectView(endpointsURLs.AUTH_CUSTOMER_MAIN);
+        return new RedirectView(endpointsURLs.AUTH_MAIN);
     }
 
-    @GetMapping(value = "${app.endpoints.auth.customer.main}")
-    public String custAuthPage(@ModelAttribute(AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME) String errorMessage) {
-        return "auth/login/cust-login";
+    @GetMapping(value = "${app.endpoints.auth.main}")
+    public String authPage(@ModelAttribute(AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME) String errorMessage) {
+        return "auth/login";
     }
 
-    @GetMapping(value = "${app.endpoints.auth.moderator.main}")
-    public String modAuthPage(@ModelAttribute(AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME) String errorMessage) {
-        return "auth/login/mod-login";
+    @GetMapping(value = "${app.endpoints.auth.failure}")
+    public RedirectView authFailurePage(RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute(
+                AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME,
+                "Неверный логин или пароль"
+        );
+        return new RedirectView(endpointsURLs.AUTH_MAIN);
     }
 
-    @GetMapping(value = "${app.endpoints.auth.wh_worker.main}")
-    public String wwAuthPage(@ModelAttribute(AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME) String errorMessage) {
-        return "auth/login/ww-login";
-    }
-
-    @GetMapping(value = "${app.endpoints.auth.customer.failure}")
-    public RedirectView custAuthPage(RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute(AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME, "Неверный логин или пароль");
-        return new RedirectView(endpointsURLs.AUTH_CUSTOMER_MAIN);
-    }
-
-    @GetMapping(value = "${app.endpoints.auth.moderator.failure}")
-    public RedirectView modAuthPage(RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute(AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME, "Неверный логин или пароль");
-        return new RedirectView(endpointsURLs.AUTH_MODERATOR_MAIN);
-    }
-
-    @GetMapping(value = "${app.endpoints.auth.wh_worker.failure}")
-    public RedirectView wwAuthPage(RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute(AUTH_ERROR_MESSAGE_ATTRIBUTE_NAME, "Неверный логин или пароль");
-        return new RedirectView(endpointsURLs.AUTH_WH_WORKER_MAIN);
-    }
-
-    @GetMapping(value = "${app.endpoints.errors.access_denied.cust_service}")
-    public String catalogAccessDenied() {
-        return "errors/access-denied/catalog";
-    }
-
-    @GetMapping(value = "${app.endpoints.errors.access_denied.management}")
-    public String managementAccessDenied() {
-        return "errors/access-denied/management";
-    }
-
-    @GetMapping(value = "${app.endpoints.errors.access_denied.warehouse}")
-    public String warehouseAccessDenied() {
-        return "errors/access-denied/warehouse";
+    @GetMapping(value = "${app.endpoints.access_denied}")
+    public String accessDenied() {
+        return "errors/access-denied";
     }
 }

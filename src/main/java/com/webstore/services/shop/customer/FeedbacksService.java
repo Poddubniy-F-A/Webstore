@@ -1,9 +1,9 @@
 package com.webstore.services.shop.customer;
 
-import com.webstore.entities.Feedback;
-import com.webstore.entities.Good;
-import com.webstore.entities.Order;
-import com.webstore.entities.User;
+import com.webstore.model.entities.Feedback;
+import com.webstore.model.entities.Good;
+import com.webstore.model.entities.Order;
+import com.webstore.model.entities.User;
 import com.webstore.exceptions.feedbacks.FeedbackNotFoundException;
 import com.webstore.exceptions.GoodNotFoundException;
 import com.webstore.exceptions.feedbacks.IllegalRatingTryException;
