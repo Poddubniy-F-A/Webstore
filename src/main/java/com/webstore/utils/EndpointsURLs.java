@@ -6,9 +6,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class EndpointsURLs {
 
-    @Value("${app.host}")
-    public String HOST;
-
     @Value("${app.endpoints.main}")
     public String MAIN;
 

@@ -5,6 +5,7 @@ import com.webstore.exceptions.cart.LockedCartException;
 import com.webstore.exceptions.cart.payment.PaymentException;
 import com.webstore.services.shop.customer.CartService;
 import com.webstore.utils.EndpointsURLs;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -57,11 +58,13 @@ public class CartController {
     }
 
     @PostMapping(value = "${app.endpoints.cart.validating}")
-    public RedirectView checkout() throws PaymentException {
+    public RedirectView checkout(HttpServletRequest request) throws PaymentException {
         service.lockCart();
+
+        String host = request.getRequestURL().toString().replace(request.getRequestURI(), "");
         return new RedirectView(service.getPaymentUrl(
-                endpointsURLs.HOST + endpointsURLs.CART_CANCELED_PAYMENT,
-                endpointsURLs.HOST + endpointsURLs.CART_FINISHED_PAYMENT
+                host + endpointsURLs.CART_CANCELED_PAYMENT,
+                host + endpointsURLs.CART_FINISHED_PAYMENT
         ));
     }
 

@@ -25,6 +25,7 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -51,34 +52,37 @@ public class SecurityConfig {
     public static class MyConfigurationAdapter {
 
         private final EndpointsURLs endpointsURLs;
-        private final Map<Role, String> rolesDefaultUrls;
-        private final Map<Role, HashSet<String>> rolesResourcesRootsUrls;
+        private final Map<Role, HashSet<String>> rolesResourcesRootsURLs;
+        private final Map<Role, String> rolesDefaultURLs;
 
         public MyConfigurationAdapter(EndpointsURLs endpointsURLs) {
             this.endpointsURLs = endpointsURLs;
-            rolesDefaultUrls = Map.of(
-                    CUST, endpointsURLs.CATALOG_MAIN,
-                    MOD, endpointsURLs.MANAGEMENT_MAIN,
-                    WW, endpointsURLs.WAREHOUSE_MAIN
-            );
-            rolesResourcesRootsUrls = Map.of(
+            rolesResourcesRootsURLs = Map.of(
                     CUST, new HashSet<>(Arrays.asList(endpointsURLs.CART_MAIN, endpointsURLs.FEEDBACKS_MAIN)),
                     MOD, new HashSet<>(Collections.singletonList(endpointsURLs.MANAGEMENT_MAIN)),
                     WW, new HashSet<>(Collections.singletonList(endpointsURLs.WAREHOUSE_MAIN))
+            );
+            rolesDefaultURLs = Map.of(
+                    CUST, endpointsURLs.CATALOG_MAIN,
+                    MOD, endpointsURLs.MANAGEMENT_MAIN,
+                    WW, endpointsURLs.WAREHOUSE_MAIN
             );
         }
 
         @Bean
         SecurityFilterChain myFilterChain(HttpSecurity http) throws Exception {
             http
-                    .authorizeHttpRequests(authorize -> authorize
-                            .requestMatchers(
-                                    endpointsURLs.CART_MAIN + "/**",
-                                    endpointsURLs.FEEDBACKS_MAIN + "/**"
-                            ).hasRole(CUST.toString())
-                            .requestMatchers(endpointsURLs.MANAGEMENT_MAIN + "/**").hasRole(MOD.toString())
-                            .requestMatchers(endpointsURLs.WAREHOUSE_MAIN + "/**").hasRole(WW.toString())
-                            .anyRequest().permitAll())
+                    .authorizeHttpRequests(authorize -> {
+                                rolesResourcesRootsURLs.forEach((role, resourcesRoots) ->
+                                        resourcesRoots.forEach(resourceRoot ->
+                                                authorize
+                                                        .requestMatchers(resourceRoot + "/**")
+                                                        .hasRole(role.toString())
+                                        )
+                                );
+                                authorize.anyRequest().permitAll();
+                            }
+                    )
                     .formLogin(login -> login
                             .loginPage(endpointsURLs.AUTH_MAIN)
                             .permitAll()
@@ -95,14 +99,13 @@ public class SecurityConfig {
                                 ) throws IOException {
                                     SavedRequest savedRequest = requestCache.getRequest(request, response);
                                     if (savedRequest != null) {
-                                        String targetUrl = savedRequest.getRedirectUrl();
-                                        if (rolesResourcesRootsUrls.values().stream().anyMatch(
-                                                urls -> urls.stream().anyMatch(
-                                                        url -> targetUrl.startsWith(endpointsURLs.HOST + url)
-                                                )
+                                        String targetURL = savedRequest.getRedirectUrl();
+                                        String targetURLPath = URI.create(targetURL).getPath();
+                                        if (rolesResourcesRootsURLs.values().stream().anyMatch(
+                                                urls -> urls.stream().anyMatch(targetURLPath::startsWith)
                                         )) {
                                             clearAuthenticationAttributes(request);
-                                            redirectStrategy.sendRedirect(request, response, targetUrl);
+                                            redirectStrategy.sendRedirect(request, response, targetURL);
                                         } else {
                                             requestCache.removeRequest(request, response);
                                             sendDefaultRedirect(request, response, authentication);
@@ -127,17 +130,20 @@ public class SecurityConfig {
                                         Authentication authentication
                                 ) throws IOException {
                                     if (!response.isCommitted()) {
-                                        redirectStrategy.sendRedirect(request, response, rolesDefaultUrls.get(
+                                        redirectStrategy.sendRedirect(request, response, rolesDefaultURLs.get(
                                                 ((MyUserDetails) authentication.getPrincipal()).getUser().getRole()
                                         ));
                                     }
                                 }
                             })
-                            .failureUrl(endpointsURLs.AUTH_FAILURE))
+                            .failureUrl(endpointsURLs.AUTH_FAILURE)
+                    )
                     .logout(logout -> logout
-                            .logoutSuccessUrl(endpointsURLs.MAIN))
+                            .logoutSuccessUrl(endpointsURLs.MAIN)
+                    )
                     .exceptionHandling(handling -> handling
-                            .accessDeniedPage(endpointsURLs.ACCESS_DENIED))
+                            .accessDeniedPage(endpointsURLs.ACCESS_DENIED)
+                    )
                     .csrf(AbstractHttpConfigurer::disable);
             return http.build();
         }
