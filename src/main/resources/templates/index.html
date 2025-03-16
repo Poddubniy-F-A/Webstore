@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>МойМагазин</title>
+    <style>
+        body {
+            background-image: url('https://drive.google.com/thumbnail?id=1HNghsHpvNVSKVcGE03fmRSb_vyul73dc');
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .welcome {
+            font-size: 2em;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .bottom {
+            position: absolute;
+            bottom: 20px;
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+
+<body>
+<div class="welcome">Добро пожаловать в МойМагазин!</div>
+<a th:href="${@environment.getProperty('app.endpoints.catalog.main')}" class="button bottom">К каталогу</a>
+<div class="top-right">
+    <a th:href="${@environment.getProperty('app.endpoints.management.main')}" class="button">В модераторскую</a>
+    <br>
+    <br>
+    <br>
+    <a th:href="${@environment.getProperty('app.endpoints.warehouse.main')}" class="button">На склад</a>
+</div>
+</body>
+</html>

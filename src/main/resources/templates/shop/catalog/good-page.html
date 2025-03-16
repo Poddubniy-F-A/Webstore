@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security6">
+<head>
+    <title>Страница товара</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column; /* Изменено для вертикального расположения */
+            margin-top: 80px; /* Отступ от верхней части страницы */
+        }
+
+        .content {
+            display: flex;
+            flex: 1;
+            margin-bottom: 20px; /* Отделяем от формы */
+        }
+
+        .image-container {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .image-container img {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .details-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .parameters, .feedbacks {
+            width: 100%;
+            overflow-y: auto;
+            max-height: 400px; /* Регулируйте высоту прокручиваемого окна */
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 20px; /* Отделяем от других элементов */
+        }
+
+        .description {
+            margin: 10px 0;
+            text-align: justify;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .add-to-cart {
+            display: flex;
+            justify-content: center; /* Центрируем форму */
+            align-items: center;
+            margin-top: 20px;
+        }
+        .add-to-cart button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .add-to-cart button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+
+<body>
+
+<div class="top-right">
+    <div sec:authorize="!hasRole('CUSTOMER')">
+        <a th:href="${@environment.getProperty('app.endpoints.auth.main')}" class="button">Войти</a>
+        <a th:href="${@environment.getProperty('app.endpoints.auth.registration')}" class="button">Регистрация</a>
+        <p sec:authorize="isAuthenticated()">У вас нет доступа к покупательским сервисам!</p>
+    </div>
+
+    <div sec:authorize="hasRole('CUSTOMER')">
+        <div class="user-info">
+            <img src="https://drive.google.com/thumbnail?id=1Gnb0a01v1naKcpv-UjXRQqQcFUXA4URH" alt="User Image">
+            <span th:text="${#authentication.principal.nick}"></span>
+            <a th:href="${@environment.getProperty('app.endpoints.cart.main')}" class="button">Корзина</a>
+            <a th:href="${@environment.getProperty('app.endpoints.feedbacks.main')}" class="button">Оставить отзыв</a>
+            <a th:href="${@environment.getProperty('app.endpoints.catalog.main')}" class="button">К каталогу</a>
+            <form th:method="post" th:action="${@environment.getProperty('app.endpoints.auth.logout')}">
+                <button type="submit" class="button">Выйти</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="content">
+        <div>
+            <div class="image-container">
+                <img th:src="${good.picturePath}" alt="Изображение товара" style="width: 500px; height: 500px;">
+            </div>
+            <p class="description" th:text="${good.description}"></p>
+        </div>
+        <div class="details-container">
+            <div class="parameters">
+                <h2>Параметры товара</h2>
+                <p><strong>Название:</strong> <span th:text="${good.label}"></span></p>
+                <p><strong>Бренд:</strong> <span th:text="${good.brand}"></span></p>
+                <p><strong>Категория:</strong> <span th:text="${good.category}"></span></p>
+                <p><strong>Цена:</strong> <span th:text="${good.price} + '$'"></span></p>
+                <p><strong>На складе:</strong> <span th:text="${good.count}"></span></p>
+                <p><strong>Заказывалось:</strong> <span th:text="${good.ordersCount}"></span></p>
+                <p><strong>Рейтинг:</strong> <span th:text="${good.rating}"></span></p>
+                <p><strong>Оценок:</strong> <span th:text="${good.ratingsCount}"></span></p>
+            </div>
+            <div class="feedbacks">
+                <h2>Отзывы</h2>
+                <div th:each="feedback : ${feedbacks}">
+                    <div>
+                        <strong th:text="${feedback.user.nick} + ':'"></strong>
+                        <p th:text="${feedback.text}"></p>
+                    </div>
+                </div>
+                <div th:if="${#lists.isEmpty(feedbacks)}">
+                    <p>Нет отзывов для этого товара</p>
+                </div>
+            </div>
+
+            <div sec:authorize="!hasRole('CUSTOMER')">
+                <p sec:authorize="isAuthenticated()">У вас нет доступа к покупательским сервисам</p>
+                <p sec:authorize="!isAuthenticated()">Чтобы добавить товары в корзину, необходимо авторизоваться</p>
+            </div>
+
+            <div sec:authorize="hasRole('CUSTOMER')">
+                <div th:if="${good.count > 0}" class="add-to-cart">
+                    <form th:action="@{${@environment.getProperty('app.endpoints.cart.main')} (id=${good.id})}" method="post">
+                        <button type="submit">Добавить в корзину</button>
+                    </form>
+                </div>
+                <div th:if="${good.count == 0}">
+                    Товара нет на складе
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

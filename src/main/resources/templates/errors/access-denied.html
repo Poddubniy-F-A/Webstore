@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ошибка доступа</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+
+<body>
+<div class="body">
+    <h1>В доступе отказано</h1>
+    <h3>У вас нет права доступа к этому ресурсу</h3>
+    <a th:href="${@environment.getProperty('app.endpoints.main')}" class="button">Вернуться на главную</a>
+    <a th:href="${@environment.getProperty('app.endpoints.auth.main')}" class="button">
+        Авторизоваться повторно
+    </a>
+</div>
+</body>
+</html>

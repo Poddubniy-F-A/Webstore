@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security6">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Магазин</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .product-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px; /* Ограничиваем максимальную ширину контейнера */
+            margin-top: 80px; /* Отступ от верхней части страницы */
+        }
+        .product-list {
+            flex: 1; /* Таблица будет занимать оставшуюся ширину */
+            max-height: 400px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        .filter-panel {
+            min-width: 200px; /* Задаем минимальную ширину для панели фильтрации */
+            padding: 10px;
+            margin-left: 20px; /* Отступ от таблицы */
+            border: 1px solid #ccc; /* Оформление рамки */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto; /* Автоматическая ширина столбцов */
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+
+<body>
+
+<div class="top-right">
+    <div sec:authorize="!hasRole('CUSTOMER')">
+        <a th:href="${@environment.getProperty('app.endpoints.auth.main')}" class="button">Войти</a>
+        <a th:href="${@environment.getProperty('app.endpoints.auth.registration')}" class="button">Регистрация</a>
+        <p sec:authorize="isAuthenticated()">У вас нет доступа к покупательским сервисам!</p>
+    </div>
+
+    <div sec:authorize="hasRole('CUSTOMER')">
+        <div class="user-info">
+            <img src="https://drive.google.com/thumbnail?id=1Gnb0a01v1naKcpv-UjXRQqQcFUXA4URH" alt="User Image">
+            <span th:text="${#authentication.principal.nick}"></span>
+            <a th:href="${@environment.getProperty('app.endpoints.cart.main')}" class="button">Корзина</a>
+            <a th:href="${@environment.getProperty('app.endpoints.feedbacks.main')}" class="button">Оставить отзыв</a>
+            <form th:method="post" th:action="${@environment.getProperty('app.endpoints.auth.logout')}">
+                <button type="submit" class="button">Выйти</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="product-container">
+    <div class="product-list">
+        <h2>Товары</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Изображение</th>
+                <th>Название</th>
+                <th>Бренд</th>
+                <th>Категория</th>
+                <th>Цена</th>
+                <th>На складе</th>
+                <th>Заказывалось</th>
+                <th>Рейтинг</th>
+                <th>Оценок</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="good : ${goods}">
+                <td><img th:src="${good.picturePath}" alt="Товар" style="width: 50px; height: 50px;"></td>
+                <td th:text="${good.label}"></td>
+                <td th:text="${good.brand}"></td>
+                <td th:text="${good.category}"></td>
+                <td th:text="${good.price}"></td>
+                <td th:text="${good.count}"></td>
+                <td th:text="${good.ordersCount}"></td>
+                <td th:text="${good.rating}"></td>
+                <td th:text="${good.ratingsCount}"></td>
+                <td>
+                    <a th:href="@{${@environment.getProperty('app.endpoints.catalog.main') + '/' + good.id}}">
+                        На страницу товара
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="filter-panel">
+        <form method="get">
+            <div>
+                <label for="sort">Сортировать по:</label>
+                <select name="sort" id="sort">
+                    <option value="ordersCount" th:selected="${defaultSort == 'ordersCount'}">Популярность</option>
+                    <option value="priceAsc" th:selected="${defaultSort == 'priceAsc'}">Цена</option>
+                    <option value="rateDesc" th:selected="${defaultSort == 'rateDesc'}">Рейтинг</option>
+                </select>
+            </div>
+            <button type="submit" class="button">Сортировать</button>
+
+            <h3>Фильтры</h3>
+            <div>
+                <label for="brand">Бренд:</label>
+                <select name="brand" id="brand">
+                    <option value="all" th:selected="${defaultBrand == 'all'}">Все</option>
+                    <option th:each="brand : ${brands}" th:value="${brand}" th:text="${brand}" th:selected="${brand == defaultBrand}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="category">Категория:</label>
+                <select name="category" id="category">
+                    <option value="all" th:selected="${defaultCategory == 'all'}">Все</option>
+                    <option th:each="category : ${categories}" th:value="${category}" th:text="${category}" th:selected="${category == defaultCategory}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="maxPrice">Максимальная цена:</label>
+                <input type="number" name="maxPrice" id="maxPrice" min="0" th:value="${defaultMaxPrice}">
+            </div>
+            <div>
+                <label for="minRating">Минимальный рейтинг:</label>
+                <select name="minRating" id="minRating">
+                    <option value="0" th:selected="${defaultMinRate == 0}">0</option>
+                    <option value="1" th:selected="${defaultMinRate == 1}">1</option>
+                    <option value="2" th:selected="${defaultMinRate == 2}">2</option>
+                    <option value="3" th:selected="${defaultMinRate == 3}">3</option>
+                    <option value="4" th:selected="${defaultMinRate == 4}">4</option>
+                    <option value="5" th:selected="${defaultMinRate == 5}">5</option>
+                </select>
+            </div>
+            <div>
+                <label for="inStock">Только в наличии:</label>
+                <input type="checkbox" name="inStock" id="inStock" th:checked="${defaultInStock}" />
+            </div>
+            <button type="submit" class="button">Применить фильтры</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

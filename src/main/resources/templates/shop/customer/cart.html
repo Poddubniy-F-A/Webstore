@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Корзина</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .product-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px; /* Ограничиваем максимальную ширину контейнера */
+            margin-top: 80px; /* Отступ от верхней части страницы */
+        }
+        .product-list {
+            flex: 1; /* Таблица будет занимать оставшуюся ширину */
+            max-height: 400px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto; /* Автоматическая ширина столбцов */
+        }
+
+        .add-to-cart {
+            display: flex;
+            justify-content: center; /* Центрируем форму */
+            align-items: center;
+            margin-top: 20px;
+        }
+        .add-to-cart button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .add-to-cart button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+
+<body>
+<div class="top-right">
+    <div class="user-info">
+        <img src="https://drive.google.com/thumbnail?id=1Gnb0a01v1naKcpv-UjXRQqQcFUXA4URH" alt="User Image">
+        <span th:text="${#authentication.principal.nick}"></span>
+        <a th:href="${@environment.getProperty('app.endpoints.feedbacks.main')}" class="button">Оставить отзыв</a>
+        <a th:href="${@environment.getProperty('app.endpoints.catalog.main')}" class="button">К каталогу</a>
+        <form th:method="post" th:action="${@environment.getProperty('app.endpoints.auth.logout')}">
+            <button type="submit" class="button">Выйти</button>
+        </form>
+    </div>
+</div>
+
+<div class="product-container">
+    <h1 th:unless="${#strings.isEmpty(wasPurchase)}">Поздравляем с покупкой!</h1>
+    <h1 th:if="${#strings.isEmpty(wasPurchase) and #maps.isEmpty(cart)}">Ваша корзина пока пуста!</h1>
+    <div th:unless="${#maps.isEmpty(cart)}" class="product-list">
+        <h2>Корзина</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Изображение</th>
+                <th>Название</th>
+                <th>Цена</th>
+                <th>На складе</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="entry : ${cart}">
+                <td><img th:src="${entry.key.picturePath}" alt="Товар" style="width: 50px; height: 50px;"></td>
+                <td th:text="${entry.key.label}"></td>
+                <td th:text="${entry.key.price * entry.value}"></td>
+                <td th:text="${entry.key.count}"></td>
+                <td>
+                    <form th:action="@{${@environment.getProperty('app.endpoints.cart.main')} (id=${entry.key.id})}" method="post">
+                        <input type="hidden" name="_method" value="put"/>
+                        <input type="number" name="quantity" min="1" th:value="${entry.value}" th:max="${entry.key.count}" required onchange="this.form.submit()">
+                    </form>
+                </td>
+
+                <td>
+                    <form th:action="@{${@environment.getProperty('app.endpoints.cart.main')} (id=${entry.key.id})}" method="post">
+                        <input type="hidden" name="_method" value="delete"/>
+                        <button type="submit">Удалить</button>
+                    </form>
+                </td>
+                <td>
+                    <a th:href="@{${@environment.getProperty('app.endpoints.catalog.main') + '/' + entry.key.id}}">
+                        На страницу товара
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div th:unless="${#strings.isEmpty(errorMessage)}" class="error-message" th:text="${errorMessage}"></div>
+<div class="add-to-cart" th:unless="${#maps.isEmpty(cart)}">
+    <form th:action="${@environment.getProperty('app.endpoints.cart.validating')}" method="post">
+        <button type="submit">Оформить заказ</button>
+    </form>
+</div>
+</body>
+</html>

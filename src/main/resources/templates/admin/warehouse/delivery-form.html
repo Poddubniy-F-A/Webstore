@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Склад</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            position: relative;
+        }
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .submit-button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .profile {
+            text-align: center;
+            margin: 20px;
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div class="top-right">
+    <div class="user-info">
+        <form th:method="post" th:action="${@environment.getProperty('app.endpoints.auth.logout')}">
+            <button type="submit" class="button">Выйти</button>
+        </form>
+    </div>
+</div>
+
+<div class="profile">
+    <img src="https://drive.google.com/thumbnail?id=1Gnb0a01v1naKcpv-UjXRQqQcFUXA4URH" alt="Профиль" width="100" height="100">
+    <br>
+    <span th:text="'Работник склада ' + ${#authentication.principal.nick}"></span>
+</div>
+
+<div class="form-container">
+    <h2 style="text-align: center;">Поставка</h2>
+    <div th:unless="${#strings.isEmpty(errorMessage)}" class="error-message" th:text="${errorMessage}"></div>
+    <form method="post">
+        <div>
+            <label for="productId">ID товара:</label>
+            <input type="number" id="productId" name="id" min="1" required>
+        </div>
+        <div>
+            <label for="quantity">Количество товара:</label>
+            <input type="number" id="quantity" name="count" min="1" required>
+        </div>
+        <br>
+        <input type="submit" class="submit-button" value="Подтвердить">
+    </form>
+</div>
+</body>
+</html>

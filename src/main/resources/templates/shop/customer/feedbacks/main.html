@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отзывы</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: space-between;
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .table-container {
+            width: 60%;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 80px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div class="top-right">
+    <div class="user-info">
+        <img src="https://drive.google.com/thumbnail?id=1Gnb0a01v1naKcpv-UjXRQqQcFUXA4URH" alt="User Image">
+        <span th:text="${#authentication.principal.nick}"></span>
+        <a th:href="${@environment.getProperty('app.endpoints.cart.main')}" class="button">Корзина</a>
+        <a th:href="${@environment.getProperty('app.endpoints.catalog.main')}" class="button">К каталогу</a>
+        <form th:method="post" th:action="${@environment.getProperty('app.endpoints.auth.logout')}">
+            <button type="submit" class="button">Выйти</button>
+        </form>
+    </div>
+</div>
+
+<div class="table-container">
+    <h2>Мои отзывы</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Изображение</th>
+            <th>Название</th>
+            <th>Отзыв</th>
+            <th>Оценка</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="entry : ${feedbackByGood}" th:if="${entry.value}">
+            <td><img th:src="${entry.key.picturePath}" alt="Товар" style="width: 50px; height: 50px;"></td>
+            <td th:text="${entry.key.label}"></td>
+            <td th:text="${entry.value.text}"></td>
+            <td th:text="${entry.value.rating}"></td>
+            <td>
+                <a th:href="@{${@environment.getProperty('app.endpoints.catalog.main') + '/' + entry.key.id}}">
+                    На страницу товара
+                </a>
+            </td>
+            <td>
+                <a th:href="@{${@environment.getProperty('app.endpoints.feedbacks.editing') + '/' + entry.key.id}}">
+                    Изменить отзыв
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="table-container">
+    <h2>Мои покупки</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Изображение</th>
+            <th>Название</th>
+            <th>Бренд</th>
+            <th>Цена</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="good : ${feedbackByGood.keySet()}" th:unless="${feedbackByGood.get(good)}">
+            <td><img th:src="${good.picturePath}" alt="Товар" style="width: 50px; height: 50px;"></td>
+            <td th:text="${good.label}"></td>
+            <td th:text="${good.brand}"></td>
+            <td th:text="${good.price}"></td>
+            <td>
+                <a th:href="@{${@environment.getProperty('app.endpoints.catalog.main') + '/' + good.id}}">
+                    На страницу товара
+                </a>
+            </td>
+            <td>
+                <a th:href="@{${@environment.getProperty('app.endpoints.feedbacks.creating') + '/' + good.id}}">
+                    Оставить отзыв
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование каталога</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .profile {
+            text-align: center;
+            margin: 20px;
+        }
+        .product-list {
+            max-height: 400px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto; /* Автоматическая ширина столбцов */
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            white-space: nowrap; /* Запрет переноса текста */
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div class="top-right">
+    <div class="user-info">
+        <form th:method="post" th:action="${@environment.getProperty('app.endpoints.auth.logout')}">
+            <button type="submit" class="button">Выйти</button>
+        </form>
+    </div>
+</div>
+
+<div class="profile">
+    <img src="https://drive.google.com/thumbnail?id=1Gnb0a01v1naKcpv-UjXRQqQcFUXA4URH" alt="Профиль" width="100" height="100">
+    <br>
+    <span th:text="'Менеджер ' + ${#authentication.principal.nick}"></span>
+</div>
+
+<div class="product-list">
+    <div th:switch="${goods}">
+        <h2 th:case="null">В каталоге нет товаров</h2>
+        <div th:case="*">
+            <h2>Товары</h2>
+            <p><a th:href="${@environment.getProperty('app.endpoints.management.creating')}">Добавить товар</a></p>
+            <table>
+                <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Изображение</th>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th>Бренд</th>
+                    <th>Категория</th>
+                    <th>Цена</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="good : ${goods}">
+                    <td th:text="${good.id}"></td>
+                    <td th:text="${good.picturePath}"></td>
+                    <td th:text="${good.label}"></td>
+                    <td th:text="${good.description}"></td>
+                    <td th:text="${good.brand}"></td>
+                    <td th:text="${good.category}"></td>
+                    <td th:text="${good.price}"></td>
+                    <td>
+                        <a th:href="@{${@environment.getProperty('app.endpoints.management.editing') + '/' + good.id}}">
+                            Изменить
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

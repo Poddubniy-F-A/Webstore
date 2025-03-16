@@ -1,0 +1,14 @@
+services:
+  db:
+    build: templates
+    image: mysql:latest
+    restart: on-failure
+    ports:
+      - "3301:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: pass
+      MYSQL_DATABASE: webstoreDB
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+volumes:
+  db_data:

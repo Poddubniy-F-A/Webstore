@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Вход</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+
+<body>
+<div class="login-container">
+  <h2 style="text-align: center">Вход</h2>
+  <div th:unless="${#strings.isEmpty(errorMessage)}" class="error-message" th:text="${errorMessage}"></div>
+  <form th:action="${@environment.getProperty('app.endpoints.auth.login')}" method="post">
+    <!-- input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/ -->
+    <div>
+      <label for="login">Логин:</label>
+      <input type="text" id="login" name="username" required>
+    </div>
+    <div>
+      <label for="password">Пароль:</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    <br>
+    <button type="submit">Войти</button>
+  </form>
+</div>
+</body>
+</html>

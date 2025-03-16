@@ -1,0 +1,53 @@
+server:
+  port: 8080
+
+
+spring:
+  application:
+    name: main
+
+  datasource:
+    url: jdbc:mysql://localhost:3301/webstoreDB
+    username: root
+    password: pass
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+
+app:
+  endpoints:
+    main: /index
+
+    auth:
+      main: /auth
+      login: /auth/process_login
+      failure: /auth/fail
+      registration: /register
+      logout: /logout
+
+    management:
+      main: /management
+      creating: /management/create
+      editing: /management/edit
+
+    warehouse:
+      main: /warehouse
+
+    catalog:
+      main: /catalog
+
+    cart:
+      main: /cart
+      validating: /cart/checkout
+      finished_payment: /cart/finish
+      canceled_payment: /cart/cancel
+
+    feedbacks:
+      main: /feedbacks
+      creating: /feedbacks/create
+      editing: /feedbacks/edit
+
+    access_denied: /access_denied

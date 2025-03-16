@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Редактирование карточки товара</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column; /* Изменено для вертикального расположения */
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            position: relative;
+        }
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .submit-button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .profile {
+            text-align: center;
+            margin: 20px;
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div class="top-right">
+    <div class="user-info">
+        <form th:method="post" th:action="${@environment.getProperty('app.endpoints.auth.logout')}">
+            <button type="submit" class="button">Выйти</button>
+        </form>
+    </div>
+</div>
+
+<div class="profile">
+    <img src="https://drive.google.com/thumbnail?id=1Gnb0a01v1naKcpv-UjXRQqQcFUXA4URH" alt="Профиль" width="100" height="100">
+    <br>
+    <span th:text="'Менеджер ' + ${#authentication.principal.nick}"></span>
+</div>
+
+<div class="form-container">
+    <h2 style="text-align: center;">Карточка товара</h2>
+    <form method="post">
+        <input type="hidden" name="_method" value="put"/>
+        <div>
+            <label for="id">id</label>
+            <input readonly type="number" id="id" name="id" th:value="${good.id}">
+        </div>
+        <div>
+            <label for="link">Ссылка на изображение:</label>
+            <input type="text" id="link" name="pp" th:value="${good.picturePath}" required>
+        </div>
+        <div>
+            <label for="label">Название:</label>
+            <input type="text" id="label" name="label" th:value="${good.label}" required>
+        </div>
+        <div>
+            <label for="description">Описание:</label>
+            <input type="text" id="description" name="description" th:value="${good.description}" required>
+        </div>
+        <div>
+            <label for="brand">Бренд:</label>
+            <input type="text" id="brand" name="brand" th:value="${good.brand}" required>
+        </div>
+        <div>
+            <label for="category">Категория:</label>
+            <input type="text" id="category" name="category" th:value="${good.category}" required>
+        </div>
+        <div>
+            <label for="price">Цена:</label>
+            <input type="number" id="price" name="price" th:value="${good.price}" required>
+        </div>
+        <br>
+        <input type="submit" class="submit-button" value="Сохранить">
+    </form>
+</div>
+</body>
+</html>

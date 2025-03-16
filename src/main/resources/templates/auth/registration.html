@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Регистрация</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+
+<body>
+<div class="login-container">
+    <h2 style="text-align: center;">Регистрация</h2>
+    <div th:unless="${#strings.isEmpty(errorMessage)}" class="error-message" th:text="${errorMessage}"></div>
+    <form th:action="${@environment.getProperty('app.endpoints.auth.registration')}" method="post">
+        <div>
+            <label for="login">Логин:</label>
+            <input type="text" id="login" name="login" required>
+        </div>
+        <div>
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div>
+            <label for="nick">Ник:</label>
+            <input type="text" id="nick" name="nick" required>
+        </div>
+        <br>
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+</div>
+</body>
+</html>
