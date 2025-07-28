@@ -1,10 +1,10 @@
 # Учебный проект интернет-магазина
 
-Требования: наличие на устройстве JDK с 23ей версией языка или выше, Docker, наличие аккаунта разработчика на https://developer.paypal.com
+Требования: наличие на устройстве JDK 23 (или выше), Docker, наличие аккаунта разработчика на https://developer.paypal.com
 
 Для развёртывания на устройстве после скачивания репозитория:
 
-1) В директории src/main/resources запустить скрипт docker-compose.yml (команда docker compose up). По умолчанию проброс портов настроен на 3301 на хосте - убедитесь что он не занят. Иначе - измените вместе со свойством spring.datasource.url в application.yaml.
+1) В директории src/main/resources запустить скрипт docker-compose.yml (команда docker compose up, убедитесь что служба Docker запущена). По умолчанию проброс портов настроен на 3301 на хосте - убедитесь что он не занят. Иначе - измените вместе со свойством spring.datasource.url в application.yaml.
 2) Интеграция с песочницей сервиса оплаты PayPal: необходимо добавить свои API credentials разработчика в src/main/java/com/webstore/config/PayPalConfig.java:
     - Client ID - в CLIENT_ID
     - Secret key - в CLIENT_SECRET
